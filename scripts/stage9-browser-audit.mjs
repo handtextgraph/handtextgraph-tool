@@ -63,12 +63,11 @@ try{
   await waitFor(`document.querySelector('svg[width="1000"][height="700"]')?.getAttribute('viewBox')!==${JSON.stringify(viewBoxBefore)}`,"pointer drag-to-pan");
 
   await send("Emulation.setDeviceMetricsOverride",{width:390,height:844,deviceScaleFactor:1,mobile:true});
-  await navigate("/blog");
   await evaluate(`document.querySelector('button[aria-label="Open menu"]')?.click()`);
   assert.equal(await evaluate('!![...document.querySelectorAll("nav")].find((node)=>node.getAttribute("aria-label")==="Mobile navigation"&&!node.hidden)'),true,"mobile menu opens");
 
   const performanceRows=[];
-  for(const route of ["/","/tools","/templates","/blog"]){
+  for(const route of ["/","/tools","/templates"]){
     await send("Emulation.setDeviceMetricsOverride",{width:1440,height:1000,deviceScaleFactor:1,mobile:false});await navigate(route);
     performanceRows.push(await evaluate(`(()=>{const nav=performance.getEntriesByType('navigation')[0];const resources=performance.getEntriesByType('resource');const js=resources.filter((item)=>item.name.includes('/_next/')&&item.name.includes('.js'));return{route:${JSON.stringify(route)},domContentLoadedMs:Math.round(nav.domContentLoadedEventEnd),loadMs:Math.round(nav.loadEventEnd),transferKb:Math.round(resources.reduce((sum,item)=>sum+(item.transferSize||0),0)/1024),jsTransferKb:Math.round(js.reduce((sum,item)=>sum+(item.transferSize||0),0)/1024),jsRequests:js.length,domNodes:document.getElementsByTagName('*').length}})()`));
   }

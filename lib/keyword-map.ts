@@ -11,5 +11,4 @@ export const keywordMap: readonly KeywordPage[] = [
   { url: "/sudoku-generator", intent: "create", primary: "printable sudoku generator", supporting: ["sudoku PDF with answers"] },
   { url: "/virtual-graph-paper", intent: "draw", primary: "virtual graph paper", supporting: ["online graph paper drawing"] },
   { url: "/pixel-art-generator", intent: "draw", primary: "pixel art generator", supporting: ["online pixel grid editor"] },
-  { url: "/blog", intent: "learn", primary: "handwriting and printable guides", supporting: ["graph paper guides", "worksheet ideas"] },
 ] as const;

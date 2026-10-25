@@ -1,14 +1,12 @@
 import assert from "node:assert/strict";
 import { publicToolCatalog } from "../lib/tool-catalog.ts";
-import { editorialArticles } from "../lib/editorial-content.ts";
 import { curatedTemplatePages } from "../lib/template-library.ts";
 
 const baseUrl = process.env.HANDWRITING_TEST_BASE_URL || "http://127.0.0.1:3105";
 const canonicalOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://handtextgraph.com";
 const uniqueToolPaths = [...new Set(publicToolCatalog.map((tool) => tool.href.split("#")[0] || "/"))];
-const articlePaths = editorialArticles.map((article) => `/blog/${article.slug}`);
 const detailPaths = curatedTemplatePages.map((page) => `/templates/${page.family}/${page.slug}`);
-const paths = [...new Set(["/", "/tools", "/templates", "/blog", "/about", "/contact", "/privacy-policy", "/terms", "/responsible-use", ...uniqueToolPaths, ...articlePaths, ...detailPaths])];
+const paths = [...new Set(["/", "/tools", "/templates", "/about", "/contact", "/privacy-policy", "/terms", "/responsible-use", ...uniqueToolPaths, ...detailPaths])];
 
 for (const path of paths) {
   const response = await fetch(`${baseUrl}${path}`, { redirect: "manual" });
@@ -25,11 +23,8 @@ for (const path of paths) {
 const homepage = await fetch(`${baseUrl}/`).then((response) => response.text());
 for (const type of ["Organization", "WebSite"]) assert.ok(homepage.includes(type), `Homepage ${type} schema`);
 assert.ok(homepage.includes("HandTextGraph"), "Homepage brand");
-const article = await fetch(`${baseUrl}${articlePaths[0]}`).then((response) => response.text());
-for (const type of ["Article", "BreadcrumbList", "FAQPage"]) assert.ok(article.includes(type), `Article ${type} schema`);
-
 const sitemap = await fetch(`${baseUrl}/sitemap.xml`).then((response) => { assert.equal(response.status, 200); return response.text(); });
-for (const path of ["/", "/tools", "/templates", "/blog", ...articlePaths, ...detailPaths]) {
+for (const path of ["/", "/tools", "/templates", ...detailPaths]) {
   const expected = `${canonicalOrigin}${path === "/" ? "" : path}`;
   assert.ok(sitemap.includes(expected), `Sitemap includes ${path}`);
 }
@@ -40,7 +35,7 @@ const robots = await fetch(`${baseUrl}/robots.txt`).then((response) => { assert.
 assert.match(robots, /User-Agent: \*/i);
 assert.ok(robots.includes(`Sitemap: ${canonicalOrigin}/sitemap.xml`));
 
-for (const [source, destination] of [["/privacy", "/privacy-policy"], ["/terms-and-conditions", "/terms"], ["/blog/pdf-to-handwriting-converter", "/blog/how-to-print-pdf-actual-size"]]) {
+for (const [source, destination] of [["/privacy", "/privacy-policy"], ["/terms-and-conditions", "/terms"]]) {
   const response = await fetch(`${baseUrl}${source}`, { redirect: "manual" });
   assert.ok([301, 307, 308].includes(response.status), `${source} redirect status`);
   assert.equal(new URL(response.headers.get("location"), baseUrl).pathname, destination, `${source} redirect destination`);
