@@ -23,7 +23,7 @@ const kalam = Kalam({
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-heading" });
 
-const googleAnalyticsId = "G-024MVPR0W4";
+const googleAnalyticsId = "G-NN2L1WT718";
 
 export const metadata: Metadata = {
   title: "Text to Handwriting Converter Free Online | HandTextGraph",
@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/icon.svg",
+  },
+  verification: {
+    google: "kKF2k0VCOdi-GqF8y9dNJDpUQUu2cRGheSfiqG4rH1g",
   },
   alternates: {
     canonical: "/",
