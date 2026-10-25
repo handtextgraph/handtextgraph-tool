@@ -1,0 +1,1 @@
+import { AssignmentTool } from "@/components/tools/GeneratorTools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("assignment-maker")} export default function Page(){return <ToolPage slug="assignment-maker"><AssignmentTool/></ToolPage>}

@@ -1,0 +1,1 @@
+import { WordSearchTool } from "@/components/tools/GeneratorTools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("word-search-maker")} export default function Page(){return <ToolPage slug="word-search-maker"><WordSearchTool/></ToolPage>}

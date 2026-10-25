@@ -1,0 +1,1 @@
+import{ContentEditor}from"@/components/admin/ContentEditor";import{csrfToken}from"@/lib/cms/admin-data";export default async function NewPage(){return <div className="mx-auto max-w-5xl"><h1 className="mb-6 text-3xl font-bold">New page</h1><ContentEditor item={{kind:"PAGE"}} csrf={await csrfToken()}/></div>}

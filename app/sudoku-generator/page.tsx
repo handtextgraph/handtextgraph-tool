@@ -1,0 +1,1 @@
+import { SudokuTool } from "@/components/tools/Stage5Tools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("sudoku-generator")} export default function Page(){return <ToolPage slug="sudoku-generator"><SudokuTool/></ToolPage>}

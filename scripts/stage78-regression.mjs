@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const read = (path) => fs.readFileSync(path, "utf8");
+const editorial = read("lib/editorial-content.ts");
+const slugs = [...editorial.matchAll(/slug:\s*"([^"]+)"/g)].map((match) => match[1]);
+assert.ok(slugs.length >= 20, `Expected at least 20 editorial articles, found ${slugs.length}`);
+assert.equal(new Set(slugs).size, slugs.length, "Editorial slugs must be unique");
+assert.ok(fs.existsSync("app/blog/page.tsx"));
+assert.ok(fs.existsSync("app/blog/[slug]/page.tsx"));
+assert.match(read("lib/site-config.ts"), /NEXT_PUBLIC_SITE_URL/);
+const keywordMap = read("lib/keyword-map.ts");
+for (const route of ["/", "/tools", "/templates", "/blog"]) assert.ok(keywordMap.includes(`url: "${route}"`));
+assert.match(read("app/sitemap.ts"), /editorialArticles/);
+const header = read("components/SiteHeader.tsx");
+for (const label of ["Handwriting", "Paper", "Templates", "Education", "Creative", "Guides"]) assert.ok(header.includes(`label:\"${label}\"`) || header.includes(`label: \"${label}\"`));
+const home = read("app/page.tsx");
+assert.match(home, /HandwritingToolLoader/);
+assert.match(home, /id="studio"/);
+console.log(`Stage 7+8 regression passed: ${slugs.length} articles, centralized SEO config, blog routes, navigation, and homepage studio.`);

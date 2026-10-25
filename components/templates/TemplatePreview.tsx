@@ -1,0 +1,2 @@
+import { PaperSvg } from "@/components/paper/PaperSvg";import { templateModel,type LibraryTemplate } from "@/lib/template-library";
+export function TemplatePreview({template,className=""}:{template:LibraryTemplate;className?:string}){return <div className={`overflow-hidden bg-slate-100 ${className}`}><PaperSvg model={templateModel(template)} className="mx-auto h-full w-full bg-white object-contain" ariaLabel={`${template.name} preview`}/></div>}

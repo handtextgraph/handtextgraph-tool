@@ -1,0 +1,1 @@
+import { CursiveTextTool } from "@/components/tools/GeneratorTools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("cursive-text-generator")} export default function Page(){return <ToolPage slug="cursive-text-generator"><CursiveTextTool/></ToolPage>}

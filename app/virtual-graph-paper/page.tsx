@@ -1,0 +1,1 @@
+import{VirtualGraphPaperToolV2}from"@/components/tools/VirtualGraphPaperToolV2";import{ToolPage}from"@/components/tools/ToolPage";import{toolMetadata}from"@/components/tools/toolMetadata";export function generateMetadata(){return toolMetadata("virtual-graph-paper")}export default function Page(){return <ToolPage slug="virtual-graph-paper"><VirtualGraphPaperToolV2/></ToolPage>}

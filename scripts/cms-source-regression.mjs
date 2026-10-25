@@ -1,0 +1,4 @@
+import assert from"node:assert/strict";import{readFileSync,existsSync}from"node:fs";import path from"node:path";
+const root=process.cwd(),read=(file)=>readFileSync(path.join(root,file),"utf8");for(const route of["app/admin/login/page.tsx","app/admin/(panel)/page.tsx","app/admin/(panel)/pages/page.tsx","app/admin/(panel)/pages/new/page.tsx","app/admin/(panel)/preview/[id]/page.tsx","app/[slug]/page.tsx"])assert.ok(existsSync(path.join(root,route)),`Missing CMS route ${route}`);
+const shell=read("components/admin/AdminShell.tsx");for(const label of["Pages","Tool Content","Account Security"])assert.match(shell,new RegExp(label));assert.doesNotMatch(shell,/Blog Posts/);const security=read("lib/cms/security.ts");for(const slug of["admin","api","tools","blog","assignment-maker"])assert.ok(security.includes(`"${slug}"`));
+console.log("Page-focused CMS source regression checks passed.");

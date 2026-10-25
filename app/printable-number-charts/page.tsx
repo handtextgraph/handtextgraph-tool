@@ -1,0 +1,1 @@
+import { NumberChartTool } from "@/components/tools/Stage5Tools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("printable-number-charts")} export default function Page(){return <ToolPage slug="printable-number-charts"><NumberChartTool/></ToolPage>}

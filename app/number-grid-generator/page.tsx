@@ -1,0 +1,1 @@
+import { NumberGridTool } from "@/components/tools/Stage5Tools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("number-grid-generator")} export default function Page(){return <ToolPage slug="number-grid-generator"><NumberGridTool/></ToolPage>}

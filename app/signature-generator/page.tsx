@@ -1,0 +1,1 @@
+import { SignatureTool } from "@/components/tools/GeneratorTools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("signature-generator")} export default function Page(){return <ToolPage slug="signature-generator"><SignatureTool/></ToolPage>}

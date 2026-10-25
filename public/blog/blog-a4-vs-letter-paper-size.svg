@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">A4 vs Letter paper size comparison</title>
+  <desc id="desc">A4 paper is taller and narrower than US Letter paper, while Letter is wider and shorter.</desc>
+  <rect width="1200" height="720" fill="#f8fafc"/>
+  <rect x="70" y="70" width="1060" height="580" rx="24" fill="#ffffff" stroke="#dbeafe" stroke-width="3"/>
+  <text x="600" y="132" text-anchor="middle" font-family="Arial, sans-serif" font-size="46" font-weight="700" fill="#0f172a">A4 vs Letter Paper Size</text>
+  <text x="600" y="174" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#475569">A4 is taller and narrower. Letter is wider and shorter.</text>
+
+  <g transform="translate(250 235)">
+    <rect x="0" y="0" width="250" height="354" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="4"/>
+    <line x1="35" y1="75" x2="215" y2="75" stroke="#93c5fd" stroke-width="3"/>
+    <line x1="35" y1="122" x2="215" y2="122" stroke="#93c5fd" stroke-width="3"/>
+    <line x1="35" y1="169" x2="215" y2="169" stroke="#93c5fd" stroke-width="3"/>
+    <line x1="35" y1="216" x2="215" y2="216" stroke="#93c5fd" stroke-width="3"/>
+    <line x1="35" y1="263" x2="215" y2="263" stroke="#93c5fd" stroke-width="3"/>
+    <text x="125" y="-28" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#1d4ed8">A4</text>
+    <text x="125" y="398" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">210 x 297 mm</text>
+    <text x="125" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">8.27 x 11.69 in</text>
+  </g>
+
+  <g transform="translate(685 256)">
+    <rect x="0" y="0" width="276" height="323" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="4"/>
+    <line x1="36" y1="72" x2="240" y2="72" stroke="#86efac" stroke-width="3"/>
+    <line x1="36" y1="117" x2="240" y2="117" stroke="#86efac" stroke-width="3"/>
+    <line x1="36" y1="162" x2="240" y2="162" stroke="#86efac" stroke-width="3"/>
+    <line x1="36" y1="207" x2="240" y2="207" stroke="#86efac" stroke-width="3"/>
+    <line x1="36" y1="252" x2="240" y2="252" stroke="#86efac" stroke-width="3"/>
+    <text x="138" y="-49" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#047857">Letter</text>
+    <text x="138" y="377" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">215.9 x 279.4 mm</text>
+    <text x="138" y="409" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">8.5 x 11 in</text>
+  </g>
+
+  <g transform="translate(118 580)">
+    <rect width="964" height="52" rx="18" fill="#f1f5f9"/>
+    <circle cx="36" cy="26" r="9" fill="#2563eb"/>
+    <text x="58" y="34" font-family="Arial, sans-serif" font-size="20" fill="#334155">Choose the size your school, printer, or PDF export expects, then keep the same size through printing.</text>
+  </g>
+</svg>

@@ -1,0 +1,1 @@
+import"server-only";import{query}from"./db";export async function getConfig(namespace:string){return(await query<{value:unknown}>(`SELECT value FROM cms_configs WHERE namespace=$1 AND key='main'`,[namespace]))[0]?.value??{}}

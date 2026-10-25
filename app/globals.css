@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --platform-navy: #102a43;
+  --platform-teal: #167d8d;
+  --platform-ice: #f3f7fb;
+  --platform-amber: #f0b77b;
+  --platform-white: #ffffff;
+  --platform-slate: #64748b;
+  --platform-border: #d9e2ec;
+  --platform-focus: #167d8d;
+  --color-paper: #fffdf7;
+  --color-cream: #fff6e9;
+  --color-coral: #f26b5b;
+  --color-teal: #218c82;
+  --color-ink: #17324d;
+  --color-copy: #455a6b;
+  --color-border: #e8e3da;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--platform-focus) 58%, transparent);
+  outline-offset: 3px;
+}
+
+body {
+  font-family: var(--font-sans), sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading), var(--font-sans), sans-serif; }
+
+.hero-surface {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-cream);
+}
+
+.hero-surface::before { display: none; }
+
+.hero-surface > div { position: relative; }
+
+.hero-ink { color: var(--color-coral); }
+
+.font-hand {
+  font-family: var(--font-hand), cursive;
+}
+
+.paper-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.paper-frame::after { display: none; }
+
+.control-card {
+  @apply rounded-3xl border border-slate-200 bg-white/95 p-5 shadow-card;
+}
+
+.input-label {
+  @apply mb-2 block text-sm font-semibold text-slate-700;
+}
+
+.input-field {
+  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:ring-4 focus:ring-blue-100;
+}
+
+.range-field {
+  @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-brand-blue;
+}
+
+.page-preview { background: #f4f1ea; }
+
+.studio-shell .handwriting-workspace { border: 0; }
+.studio-shell .preview-panel { background: #f4f1ea; }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body:has(.admin-shell) .public-site-header,
+body:has(.admin-shell) .public-site-footer,
+body:has(.admin-shell) .public-site-consent {
+  display: none;
+}

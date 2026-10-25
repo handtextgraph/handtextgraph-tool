@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import { defaultSettings, handwritingStyles } from "../lib/handwriting.ts";
+import { paperGeneratorSlugs } from "../lib/paper-generators.ts";
+import { toolPageConfigs } from "../lib/tool-pages.ts";
+
+const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+const studio = read("components/HandwritingTool.tsx"), renderer = read("lib/handwriting.ts"), sitemap = read("app/sitemap.ts");
+assert.ok(handwritingStyles.length >= 8, "Multiple distinct handwriting styles must remain available");
+assert.equal(defaultSettings.orientation, "portrait");
+assert.equal(defaultSettings.textAlignment, "left");
+assert.equal(defaultSettings.paperPatternId, "none");
+for (const token of ["letterSpacing", "customInkColor", "paperPatternSpacingMm", "previewZoom", "transparentPng"]) assert.match(studio, new RegExp(token));
+for (const token of ["buildGeneratorPageModel", "drawSharedPaperPattern", "settings.textAlignment", "settings.letterSpacing"]) assert.ok(renderer.includes(token));
+assert.equal(paperGeneratorSlugs.length, 17);
+assert.ok(existsSync(new URL("../app/tools/word-to-handwriting/page.tsx", import.meta.url)));
+assert.equal(toolPageConfigs.word.path, "/tools/word-to-handwriting");
+assert.match(toolPageConfigs.word.limitations, /does not preserve/i);
+assert.match(sitemap, /\/tools\/word-to-handwriting/);
+assert.match(read("components/DocxTextImporter.tsx"), /Legacy \.doc files are not supported/);
+assert.match(read("components/PdfTextImporter.tsx"), /OCR, which is not currently available/);
+console.log("Stage 4 handwriting checks passed for page formats, shared backgrounds, controls, imports, and Word route.");
