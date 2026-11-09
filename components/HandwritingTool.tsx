@@ -54,6 +54,56 @@ const pdfQualities = [
   { value: "high", label: "300 DPI — print" },
 ] as const;
 
+/**
+ * One-tap sample texts for the editor. Hindi lines render in Kalam and
+ * Urdu lines in Noto Nastaliq Urdu (see lib/handwriting.ts scriptFont);
+ * Latin text keeps the selected handwriting style.
+ */
+const sampleTexts = [
+  {
+    label: "English note",
+    text: `Meeting Notes — 10 November
+
+We agreed to keep the homepage simple: the converter first, the toolkit second. The next step is a short guide for each tool, written the same week the tool ships.
+
+Action: draft the guide outline before Friday.`,
+  },
+  {
+    label: "Hindi",
+    text: `मेरी दिनचर्या
+
+सुबह मैं जल्दी उठता हूँ और पढ़ाई करता हूँ।
+दोपहर में मैं अपने काम पर ध्यान देता हूँ।`,
+  },
+  {
+    label: "Urdu",
+    text: `میری روزمرہ زندگی
+
+صبح میں جلدی اٹھتا ہوں اور مطالعہ کرتا ہوں۔
+دوپہر میں میں اپنے کام پر توجہ دیتا ہوں۔`,
+  },
+  {
+    label: "Mixed",
+    text: `Class Notes — Photosynthesis
+
+Plants convert light energy into chemical energy.
+प्रकाश संश्लेषण में पौधे सूर्य के प्रकाश का उपयोग करते हैं۔
+پودے سورج کی روشنی سے توانائی بناتے ہیں۔`,
+  },
+  {
+    label: "Long passage",
+    text: `The Value of a Notebook
+
+A notebook is the simplest thinking tool we own. It asks for nothing — no battery, no signal, no subscription — and it keeps whatever we give it: half-formed ideas, lists, sketches, and the occasional sentence that turns out to matter more than the rest of the page.
+
+Writing by hand slows us down just enough to notice what we are actually saying. A typed paragraph can be produced faster than it can be thought through; a handwritten one forces a choice with every line. That friction is the point. When the words cost a little effort, we spend them more carefully.
+
+None of this requires expensive stationery. A plain ruled page, a pen that does not skip, and ten unhurried minutes are enough to turn a scattered morning into a plan. The habit compounds: a page a day becomes a record of a year, and a record of a year becomes evidence of how far an idea has travelled.
+
+Start small. One page, one topic, no audience. The notebook does not judge drafts; it only keeps them.`,
+  },
+] as const;
+
 const settingPresets: Array<{
   label: string;
   icon: string;
@@ -212,6 +262,14 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
   const [customPaperError, setCustomPaperError] = useState("");
   const [transparentPng, setTransparentPng] = useState(false);
   const [previewZoom, setPreviewZoom] = useState(70);
+  // Preview-only comparison: when on, the live preview renders with
+  // variation at its minimum so the effect of the slider is visible.
+  // Exports always use the slider value.
+  const [showFlatVariation, setShowFlatVariation] = useState(false);
+  const effectiveSettings = useMemo(
+    () => (showFlatVariation ? { ...settings, randomness: 0.05 } : settings),
+    [settings, showFlatVariation],
+  );
   const [customFonts, setCustomFonts] = useState<HandwritingStyle[]>(() => getCustomHandwritingStyles());
   const renderRequestId = useRef(0);
   const exportLock = useRef(false);
@@ -230,7 +288,16 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
   }), [fileName, noteDate, noteSubject, noteTitle, settings, text]);
   const { clearDraft, isSaved } = useHandwritingDraft(profile, draft, (restored) => {
     setText(restored.text);
-    setSettings({ ...profileConfig.settings, ...restored.settings });
+    // A saved draft can carry a page size or orientation this profile does
+    // not offer (for example A3 on the PDF profile) — coerce to the
+    // profile's allowed sizes instead of showing an option that cannot export.
+    const allowedPageSize = profileConfig.allowedPageSizes.includes(restored.settings.pageSize)
+      ? restored.settings.pageSize
+      : "a4";
+    const allowedOrientation = profileConfig.allowLandscape || restored.settings.orientation === "portrait"
+      ? restored.settings.orientation
+      : "portrait";
+    setSettings({ ...profileConfig.settings, ...restored.settings, pageSize: allowedPageSize, orientation: allowedOrientation });
     setFileName(restored.fileName);
     setNoteTitle(restored.noteTitle);
     setNoteSubject(restored.noteSubject);
@@ -261,7 +328,7 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
     const timeoutId = window.setTimeout(() => {
       setIsRendering(true);
       setRenderError("");
-      void renderHandwriting(text, settings, customPaperImage ? { customPaperImage } : undefined)
+      void renderHandwriting(text, effectiveSettings, customPaperImage ? { customPaperImage } : undefined)
         .then((result) => {
           if (renderRequestId.current !== requestId) {
             return;
@@ -293,7 +360,7 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
     }, hasUserText ? 120 : 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [customPaperImage, hasUserText, profile, renderAttempt, settings, text]);
+  }, [customPaperImage, effectiveSettings, hasUserText, profile, renderAttempt, text]);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const shownPageCount = hasUserText ? Math.max(pages.length, 1) : 0;
@@ -501,7 +568,6 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
           </div>
         </div>
 
-        {profile === "pdf" && <PdfTextImporter onTextExtracted={setText} />}
         {profile === "word" && <DocxTextImporter onTextExtracted={setText} />}
         {profile === "notes" && (
           <fieldset className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 p-4">
@@ -540,6 +606,25 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
           className="input-field min-h-[210px] resize-y rounded-xl leading-6"
           placeholder={profileConfig.placeholder}
         />
+        <div className="mt-3">
+          <p className="input-label">Try a sample</p>
+          <div className="flex flex-wrap gap-2">
+            {sampleTexts.map((sample) => (
+              <button
+                key={sample.label}
+                type="button"
+                onClick={() => setText(sample.text)}
+                className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+              >
+                {sample.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Hindi words render in Kalam and Urdu words in Noto Nastaliq Urdu; Latin text keeps the handwriting style you choose.
+          </p>
+        </div>
+        {profile === "pdf" && <PdfTextImporter onTextExtracted={setText} />}
         <div className="mt-4">
           <p className="input-label">Quick presets</p>
           <div className="flex flex-wrap gap-2">
@@ -743,18 +828,23 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
               value={settings.pageSize}
               onChange={(event) => updateSetting("pageSize", event.target.value as RenderSettings["pageSize"])}
             >
-              {pageSizes.map((pageSize) => (
-                <option key={pageSize.value} value={pageSize.value}>
-                  {pageSize.label}
-                </option>
-              ))}
+              {pageSizes
+                .filter((pageSize) => profileConfig.allowedPageSizes.includes(pageSize.value))
+                .map((pageSize) => (
+                  <option key={pageSize.value} value={pageSize.value}>
+                    {pageSize.label}
+                  </option>
+                ))}
             </select>
+            {!profileConfig.allowLandscape && (
+              <p className="mt-1 text-xs leading-5 text-slate-500">This converter offers A4 or Letter only.</p>
+            )}
           </div>
 
           <div>
             <label className="input-label" htmlFor="orientation">Orientation</label>
             <select id="orientation" className="input-field" value={settings.orientation} onChange={(event) => updateSetting("orientation", event.target.value as RenderSettings["orientation"])}>
-              <option value="portrait">Portrait</option><option value="landscape">Landscape</option>
+              <option value="portrait">Portrait</option>{profileConfig.allowLandscape && <option value="landscape">Landscape</option>}
             </select>
           </div>
 
@@ -841,6 +931,33 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
             onChange={(value) => updateSetting("wordSpacing", value)}
           />
           <RangeControl id="letterSpacing" label="Letter Spacing" min={-1} max={5} step={0.25} value={settings.letterSpacing} onChange={(value) => updateSetting("letterSpacing", value)} />
+          <div className="border-b border-slate-100 pb-3 md:col-span-2 xl:col-span-3">
+            <RangeControl
+              id="naturalVariation"
+              label="Natural Variation"
+              min={0.05}
+              max={0.9}
+              step={0.05}
+              value={settings.randomness}
+              onChange={(value) => updateSetting("randomness", value)}
+            />
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Variation gives each letter small differences in size, position, rotation, and ink strength, so the page reads as handwritten rather than typed. At the minimum the letters sit almost uniformly; at the default 0.38 the irregularity is visible but the text stays easy to read.
+            </p>
+            <button
+              type="button"
+              aria-pressed={showFlatVariation}
+              onClick={() => setShowFlatVariation((current) => !current)}
+              className="mt-2 inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+            >
+              {showFlatVariation ? "Back to my variation" : "See it without variation"}
+            </button>
+            {showFlatVariation && (
+              <p className="mt-2 text-xs font-semibold text-slate-600" role="status">
+                Previewing with variation at its minimum. Downloads still use your slider value.
+              </p>
+            )}
+          </div>
         </div>
 
         <details className="mt-6 border-y border-slate-200 py-4">
@@ -850,19 +967,10 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
             </span>
             Advanced Settings
             <span className="ml-2 text-sm font-normal text-slate-500">
-              Fine-tune margins, paper brightness, tilt, and handwriting variation.
+              Fine-tune margins, paper brightness, and tilt.
             </span>
           </summary>
           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <RangeControl
-              id="randomness"
-              label="Natural Variation"
-              min={0.05}
-              max={0.9}
-              step={0.05}
-              value={settings.randomness}
-              onChange={(value) => updateSetting("randomness", value)}
-            />
             <RangeControl
               id="leftMargin"
               label="Left Margin"
