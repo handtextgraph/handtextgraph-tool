@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
-import { DM_Sans, Kalam, Manrope } from "next/font/google";
+import { DM_Sans, Kalam, Manrope, Noto_Nastaliq_Urdu } from "next/font/google";
 import { defaultSocialImage } from "@/lib/seo";
 import { siteAuthor } from "@/lib/author";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
@@ -16,9 +16,18 @@ const dmSans = DM_Sans({
 });
 
 const kalam = Kalam({
-  subsets: ["latin"],
+  // Devanagari as well as Latin: Kalam is the handwriting font the
+  // renderer uses for Hindi words (see lib/handwriting.ts scriptFont).
+  subsets: ["latin", "devanagari"],
   weight: ["300", "400", "700"],
   variable: "--font-hand",
+});
+
+const notoNastaliqUrdu = Noto_Nastaliq_Urdu({
+  // Arabic subset: the renderer uses this face for Urdu words.
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  variable: "--font-urdu",
 });
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-heading" });
@@ -139,7 +148,7 @@ export default function RootLayout({
         <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5045380130139381" crossOrigin="anonymous" strategy="afterInteractive" />
         
       </head>
-      <body className={`${dmSans.variable} ${kalam.variable} ${manrope.variable} overflow-x-hidden bg-brand-paper text-brand-ink antialiased`}>
+      <body className={`${dmSans.variable} ${kalam.variable} ${notoNastaliqUrdu.variable} ${manrope.variable} overflow-x-hidden bg-brand-paper text-brand-ink antialiased`}>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
           strategy="afterInteractive"
