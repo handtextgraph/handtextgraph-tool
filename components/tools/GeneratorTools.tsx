@@ -15,6 +15,9 @@ function Actions({ children }: { children: React.ReactNode }) { return <div clas
 function printElement(id: string) { const node = document.getElementById(id); if (!node) return; const popup = window.open("", "_blank", "noopener,noreferrer"); if (!popup) return; popup.document.write(`<html><head><title>Print</title><style>body{font-family:Arial;margin:30px} .no-print{display:none} @media print{body{margin:0}}</style></head><body>${node.outerHTML}</body></html>`); popup.document.close(); popup.print(); }
 
 const cursiveFonts = ["cursive", "'Segoe Script', cursive", "'Brush Script MT', cursive", "var(--font-hand), cursive"];
+// Display names for cursiveFonts, in the same order: the generic cursive
+// family, Segoe Script, Brush Script MT, and Kalam (the --font-hand face).
+const cursiveFontNames = ["Classic Cursive", "Segoe Script", "Brush Script MT", "Kalam"];
 
 function resolveCanvasFontFamily(font: string) {
   const variable = font.match(/^var\((--[^)]+)\)/);
@@ -23,19 +26,253 @@ function resolveCanvasFontFamily(font: string) {
   return resolved ? font.replace(variable[0], resolved) : "'Kalam', 'Segoe Script', cursive";
 }
 
+// Unicode copy-paste cursive: Mathematical Alphanumeric Symbols script
+// letters, with the same exception tables FancyTextTool uses for the
+// script block (capitals B/E/F/H/I/L/M/R and small e/g/o live in the
+// Letterlike Symbols block, not at the computed offsets). Bold script
+// capitals and small letters are contiguous, so they need no exceptions.
+// Code points verified assigned (Python unicodedata, 10 Nov 2026).
+const scriptUpperExceptions: Record<string, string> = {
+  B: "ℬ", E: "ℰ", F: "ℱ", H: "ℋ", I: "ℐ", L: "ℒ", M: "ℳ", R: "ℛ",
+};
+const scriptLowerExceptions: Record<string, string> = { e: "ℯ", g: "ℊ", o: "ℴ" };
+
+function toScriptLetters(text: string, bold: boolean): string {
+  const upperBase = bold ? 0x1d4d0 : 0x1d49c;
+  const lowerBase = bold ? 0x1d4ea : 0x1d4b6;
+  return Array.from(text).map((ch) => {
+    if (ch >= "A" && ch <= "Z") {
+      if (!bold && scriptUpperExceptions[ch]) return scriptUpperExceptions[ch];
+      return String.fromCodePoint(upperBase + (ch.charCodeAt(0) - 65));
+    }
+    if (ch >= "a" && ch <= "z") {
+      if (!bold && scriptLowerExceptions[ch]) return scriptLowerExceptions[ch];
+      return String.fromCodePoint(lowerBase + (ch.charCodeAt(0) - 97));
+    }
+    return ch;
+  }).join("");
+}
+
+function withCombiningMark(scriptText: string, mark: string): string {
+  return Array.from(scriptText).map((ch) => (ch === " " ? ch : ch + mark)).join("");
+}
+
+function tiedScript(scriptText: string): string {
+  // Join neighbouring letters with U+0361 (combining double inverted breve).
+  return Array.from(scriptText).map((ch, i, arr) => {
+    if (ch === " ") return ch;
+    const next = arr[i + 1];
+    return next && next !== " " ? ch + "\u0361" : ch;
+  }).join("");
+}
+
+type CursiveUnicodeStyle = { id: string; name: string; note: string; convert: (text: string) => string };
+
+const cursiveUnicodeStyles: CursiveUnicodeStyle[] = [
+  { id: "script", name: "Script", note: "Mathematical script", convert: (t) => toScriptLetters(t, false) },
+  { id: "bold-script", name: "Bold Script", note: "Mathematical bold script", convert: (t) => toScriptLetters(t, true) },
+  { id: "script-underline", name: "Underlined Script", note: "Script + combining low line", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0332") },
+  { id: "script-double-underline", name: "Double-Underlined Script", note: "Script + combining double low line", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0333") },
+  { id: "script-overline", name: "Overlined Script", note: "Script + combining overline", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0305") },
+  { id: "script-strike", name: "Struck-Through Script", note: "Script + combining long stroke overlay", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0336") },
+  { id: "script-tilde", name: "Tilde Script", note: "Script + combining tilde", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0303") },
+  { id: "script-tilde-below", name: "Tilde-Below Script", note: "Script + combining tilde below", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0330") },
+  { id: "script-tied", name: "Tied Script", note: "Script letters joined with a tie", convert: (t) => tiedScript(toScriptLetters(t, false)) },
+  { id: "script-dotted", name: "Dotted Script", note: "Script + combining dot below", convert: (t) => withCombiningMark(toScriptLetters(t, false), "\u0323") },
+];
+
 export function CursiveTextTool() {
+  const [mode, setMode] = useState<"image" | "unicode">("image");
   const [text, setText] = useState("Write something beautiful"); const [font, setFont] = useState(cursiveFonts[3]); const [size, setSize] = useState(88); const [color, setColor] = useState("#173a78"); const [bg, setBg] = useState("#fffdf7"); const [spacing, setSpacing] = useState(1); const [lineHeight, setLineHeight] = useState(1.35); const [align, setAlign] = useState<CanvasTextAlign>("center"); const [bold, setBold] = useState(false); const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [uniText, setUniText] = useState("Write something beautiful");
+  const [copied, setCopied] = useState("");
+  const uniOutputs = useMemo(() => cursiveUnicodeStyles.map((style) => ({ ...style, output: style.convert(uniText) })), [uniText]);
+  const copyUni = async (id: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(id);
+      window.setTimeout(() => setCopied((current) => (current === id ? "" : current)), 2000);
+    } catch {
+      setCopied("");
+    }
+  };
   useEffect(() => { let cancelled = false; const render = async () => { await document.fonts.ready; if (cancelled) return; const canvas = canvasRef.current; if (!canvas) return; canvas.width = 1400; canvas.height = 800; const ctx = canvas.getContext("2d")!; ctx.fillStyle = bg; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "top"; ctx.font = `${bold ? 700 : 400} ${size}px ${resolveCanvasFontFamily(font)}`; ctx.letterSpacing = `${spacing}px`; const x = align === "left" ? 90 : align === "right" ? 1310 : 700; wrapCanvasText(ctx,text,x,110,1220,size*lineHeight); }; void render(); return () => { cancelled = true; }; },[text,font,size,color,bg,spacing,lineHeight,align,bold]);
-  return <div className="grid gap-6 lg:grid-cols-[380px,1fr]"><div className={panel}><Field label="Text"><textarea className={control} rows={7} value={text} onChange={e=>setText(e.target.value.slice(0,2000))}/></Field><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label="Cursive font"><select className={control} value={font} onChange={e=>setFont(e.target.value)}>{cursiveFonts.map((f,i)=><option key={f} value={f}>Style {i+1}</option>)}</select></Field><Field label="Font size"><input className={control} type="number" min="32" max="180" value={size} onChange={e=>setSize(Math.max(32,Math.min(180,+e.target.value||32)))}/></Field><Field label="Text color"><input className={`${control} h-11`} type="color" value={color} onChange={e=>setColor(e.target.value)}/></Field><Field label="Background"><input className={`${control} h-11`} type="color" value={bg} onChange={e=>setBg(e.target.value)}/></Field><Field label="Letter spacing"><input className={control} type="range" min="0" max="10" value={spacing} onChange={e=>setSpacing(+e.target.value)}/></Field><Field label="Line height"><input className={control} type="range" min="1" max="2" step=".05" value={lineHeight} onChange={e=>setLineHeight(+e.target.value)}/></Field></div><div className="mt-4 flex flex-col gap-2 sm:flex-row"><button className={secondary} aria-pressed={bold} onClick={()=>setBold(!bold)}>Bold</button><select aria-label="Alignment" className={control} value={align} onChange={e=>setAlign(e.target.value as CanvasTextAlign)}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></div><Actions><button className={secondary} onClick={()=>navigator.clipboard.writeText(text)}>Copy text</button><button className={secondary} onClick={()=>{setText("");setSize(88);setColor("#173a78");setBg("#fffdf7")}}>Reset</button></Actions><p className="mt-4 text-sm leading-6 text-slate-500">This preview is font-rendered text. Copying copies the underlying characters, so another app may display a different font.</p></div><div className={panel}><h2 className="text-xl font-semibold">Live cursive preview</h2><p className="mt-1 text-sm text-slate-500">The downloaded PNG, JPG, and PDF use this same high-resolution canvas.</p><canvas ref={canvasRef} className="mt-4 h-auto min-h-[260px] w-full rounded-2xl border bg-white"/><Actions>{(["png","jpg","pdf"] as const).map(k=><button key={k} className={k==="pdf"?button:secondary} onClick={()=>downloadCanvas(canvasRef.current!,"cursive-text",k)}>Download {k.toUpperCase()}</button>)}</Actions></div></div>;
+  const unicodeView = (
+    <div>
+      <div className="mb-4 flex gap-2">
+        <button className={secondary} onClick={() => setMode("image")}>Image</button>
+        <button className={button} onClick={() => setMode("unicode")}>Copy-paste text</button>
+      </div>
+      <div className={panel}>
+        <Field label="Text"><textarea className={control} rows={3} value={uniText} onChange={(e) => setUniText(e.target.value.slice(0, 500))} placeholder="Type text to style it" /></Field>
+        <p className="mt-3 text-sm leading-6 text-slate-500">These styles are built from Unicode characters, not from a font — copying copies the styled characters themselves. Some apps or older devices may display a few characters differently.</p>
+      </div>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        {uniOutputs.map((style) => (
+          <div key={style.id} className={panel}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-950">{style.name}</h2>
+                <p className="text-sm text-slate-500">{style.note}</p>
+              </div>
+              <button className={copied === style.id ? button : secondary} onClick={() => void copyUni(style.id, style.output)} disabled={!style.output.trim()}>
+                {copied === style.id ? "Copied" : "Copy"}
+              </button>
+            </div>
+            <p className="mt-4 break-words text-xl leading-9 text-slate-900">{style.output || "—"}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  if (mode === "unicode") return unicodeView;
+  return <div><div className="mb-4 flex gap-2"><button className={button} onClick={() => setMode("image")}>Image</button><button className={secondary} onClick={() => setMode("unicode")}>Copy-paste text</button></div><div className="grid gap-6 lg:grid-cols-[380px,1fr]"><div className={panel}><Field label="Text"><textarea className={control} rows={7} value={text} onChange={e=>setText(e.target.value.slice(0,2000))}/></Field><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label="Cursive font"><select className={control} value={font} onChange={e=>setFont(e.target.value)}>{cursiveFonts.map((f,i)=><option key={f} value={f}>{cursiveFontNames[i]}</option>)}</select></Field><Field label="Font size"><input className={control} type="number" min="32" max="180" value={size} onChange={e=>setSize(Math.max(32,Math.min(180,+e.target.value||32)))}/></Field><Field label="Text color"><input className={`${control} h-11`} type="color" value={color} onChange={e=>setColor(e.target.value)}/></Field><Field label="Background"><input className={`${control} h-11`} type="color" value={bg} onChange={e=>setBg(e.target.value)}/></Field><Field label="Letter spacing"><input className={control} type="range" min="0" max="10" value={spacing} onChange={e=>setSpacing(+e.target.value)}/></Field><Field label="Line height"><input className={control} type="range" min="1" max="2" step=".05" value={lineHeight} onChange={e=>setLineHeight(+e.target.value)}/></Field></div><div className="mt-4 flex flex-col gap-2 sm:flex-row"><button className={secondary} aria-pressed={bold} onClick={()=>setBold(!bold)}>Bold</button><select aria-label="Alignment" className={control} value={align} onChange={e=>setAlign(e.target.value as CanvasTextAlign)}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></div><Actions><button className={secondary} onClick={()=>navigator.clipboard.writeText(text)}>Copy text</button><button className={secondary} onClick={()=>{setText("");setSize(88);setColor("#173a78");setBg("#fffdf7")}}>Reset</button></Actions><p className="mt-4 text-sm leading-6 text-slate-500">This preview is font-rendered text. Copying copies the underlying characters, so another app may display a different font.</p></div><div className={panel}><h2 className="text-xl font-semibold">Live cursive preview</h2><p className="mt-1 text-sm text-slate-500">The downloaded PNG, JPG, and PDF use this same high-resolution canvas.</p><canvas ref={canvasRef} className="mt-4 h-auto min-h-[260px] w-full rounded-2xl border bg-white"/><Actions>{(["png","jpg","pdf"] as const).map(k=><button key={k} className={k==="pdf"?button:secondary} onClick={()=>downloadCanvas(canvasRef.current!,"cursive-text",k)}>Download {k.toUpperCase()}</button>)}</Actions></div></div></div>;
 }
 
 export function SentenceScrambleTool(){ const [source,setSource]=useState("The curious fox jumps over the log.\nStudents learn best through active practice."); const [difficulty,setDifficulty]=useState<PuzzleDifficulty>("medium");const [versions,setVersions]=useState(1);const [answers,setAnswers]=useState(true);const [seed,setSeed]=useState(0); const originals=useMemo(()=>source.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,30),[source]); const output=useMemo(()=>Array.from({length:versions},(_,versionIndex)=>{const random=createSeededRandom(createPuzzleSeed("sentence",seed,source,difficulty,versions,versionIndex));return originals.map(s=>scrambleSentence(s,difficulty,random))}),[originals,source,difficulty,versions,seed]); const copy=()=>navigator.clipboard.writeText(output.map((v,i)=>`Version ${i+1}\n${v.map((s,j)=>`${j+1}. ${s}`).join("\n")}`).join("\n\n")); return <WorksheetFrame title="Sentence Scramble Worksheet" controls={<><Field label="Sentences (one per line)"><textarea rows={8} className={control} value={source} onChange={e=>setSource(e.target.value)}/></Field><div className="mt-4 grid grid-cols-2 gap-3"><Field label="Difficulty"><select className={control} value={difficulty} onChange={e=>setDifficulty(e.target.value as PuzzleDifficulty)}><option>easy</option><option>medium</option><option>hard</option></select></Field><Field label="Versions"><input className={control} type="number" min="1" max="5" value={versions} onChange={e=>setVersions(Math.max(1,Math.min(5,+e.target.value)))}/></Field></div><label className="mt-4 flex gap-2"><input type="checkbox" checked={answers} onChange={e=>setAnswers(e.target.checked)}/> Include answer key</label><Actions><button className={button} onClick={()=>setSeed(s=>s+1)}>Regenerate</button><button className={secondary} onClick={copy}>Copy scrambled sentences</button></Actions></>}><div className="space-y-8">{output.map((version,i)=><section key={`${seed}-${i}`}><h3 className="font-bold">Version {i+1}</h3><ol className="mt-3 list-decimal space-y-3 pl-6">{version.map((s,j)=><li key={j} contentEditable suppressContentEditableWarning className="border-b border-slate-300 pb-2">{s}</li>)}</ol></section>)}{answers&&<section className="border-t-2 pt-5"><h3 className="font-bold">Answer key</h3><ol className="mt-3 list-decimal pl-6">{originals.map(s=><li key={s}>{s}</li>)}</ol></section>}</div></WorksheetFrame>; }
 
 function WorksheetFrame({title,controls,children}:{title:string;controls:React.ReactNode;children:React.ReactNode}){return <div className="grid gap-6 lg:grid-cols-[380px,1fr]"><div className={panel}>{controls}</div><div className={panel}><div id="printable-tool" className="mx-auto min-h-[700px] max-w-[800px] bg-white p-8 text-slate-900 shadow-sm"><h2 className="border-b-2 pb-3 text-2xl font-bold">{title}</h2><p className="mt-3 text-sm">Name: ____________________ &nbsp; Date: ____________</p><div className="mt-8">{children}</div></div><Actions><button className={button} onClick={()=>printElement("printable-tool")}>Print / Save PDF</button></Actions></div></div>}
 
-export function WordSearchTool(){const [words,setWords]=useState("APPLE\nBANANA\nORANGE\nGRAPE\nMANGO");const [size,setSize]=useState(12);const [difficulty,setDifficulty]=useState<PuzzleDifficulty>("medium");const [title,setTitle]=useState("Fruit Word Search");const [answer,setAnswer]=useState(false);const [seed,setSeed]=useState(0);const data=useMemo(()=>makeWordSearch(words.split(/\n|,/),size,difficulty,createPuzzleSeed("word-search",seed,words,size,difficulty)),[words,size,difficulty,seed]);const marked=new Set<string>();if(answer)data.placements.forEach(p=>{for(let i=0;i<p.word.length;i++)marked.add(`${p.row+p.dr*i}-${p.col+p.dc*i}`)});return <WorksheetFrame title={title} controls={<><Field label="Puzzle title"><input className={control} value={title} onChange={e=>setTitle(e.target.value)}/></Field><Field label="Words (line or comma separated)"><textarea className={control} rows={8} value={words} onChange={e=>setWords(e.target.value)}/></Field><div className="mt-4 grid grid-cols-2 gap-3"><Field label="Grid size"><select className={control} value={size} onChange={e=>setSize(+e.target.value)}>{[10,12,15,18,20].map(n=><option key={n}>{n}</option>)}</select></Field><Field label="Difficulty"><select className={control} value={difficulty} onChange={e=>setDifficulty(e.target.value as PuzzleDifficulty)}><option>easy</option><option>medium</option><option>hard</option></select></Field></div><label className="mt-4 flex gap-2"><input type="checkbox" checked={answer} onChange={e=>setAnswer(e.target.checked)}/> Show highlighted answer key</label><Actions><button className={button} onClick={()=>setSeed(s=>s+1)}>Generate new puzzle</button></Actions>{data.failed.length>0&&<p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">Could not place: {data.failed.join(", ")}. Choose a larger grid or shorter words.</p>}</>}><div className="overflow-x-auto"><div className="mx-auto grid w-fit gap-0 border" style={{gridTemplateColumns:`repeat(${size}, minmax(22px,32px))`}}>{data.grid.flatMap((row,r)=>row.map((letter,c)=><span key={`${r}-${c}`} className={`flex aspect-square items-center justify-center border border-slate-100 text-sm font-bold ${marked.has(`${r}-${c}`)?"rounded-full bg-yellow-300":""}`}>{letter}</span>))}</div><p className="mt-6 text-center font-semibold">{data.placements.map(p=>p.word).join(" • ")}</p></div></WorksheetFrame>}
+type WordSearchToggles = { horizontal: boolean; vertical: boolean; diagonal: boolean; backwards: boolean };
 
-export function SignatureTool(){const [mode,setMode]=useState<"typed"|"draw">("typed");const [name,setName]=useState("Alex Morgan");const [font,setFont]=useState(cursiveFonts[1]);const [color,setColor]=useState("#111827");const [thickness,setThickness]=useState(4);const [transparent,setTransparent]=useState(true);const canvasRef=useRef<HTMLCanvasElement>(null);const drawing=useRef(false);const history=useRef<ImageData[]>([]);const renderTyped=()=>{const c=canvasRef.current;if(!c)return;const x=c.getContext("2d")!;x.clearRect(0,0,c.width,c.height);if(!transparent){x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height)}x.fillStyle=color;x.textAlign="center";x.textBaseline="middle";x.font=`112px ${resolveCanvasFontFamily(font)}`;x.fillText(name,c.width/2,c.height/2)};useEffect(()=>{void document.fonts.ready.then(renderTyped)},[name,font,color,transparent,mode]);const point=(e:ReactPointerEvent<HTMLCanvasElement>)=>{const rect=e.currentTarget.getBoundingClientRect();return{x:(e.clientX-rect.left)*e.currentTarget.width/rect.width,y:(e.clientY-rect.top)*e.currentTarget.height/rect.height}};const start=(e:ReactPointerEvent<HTMLCanvasElement>)=>{if(mode!=="draw")return;e.currentTarget.setPointerCapture(e.pointerId);const ctx=e.currentTarget.getContext("2d")!;history.current.push(ctx.getImageData(0,0,e.currentTarget.width,e.currentTarget.height));const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);drawing.current=true};const move=(e:ReactPointerEvent<HTMLCanvasElement>)=>{if(!drawing.current)return;const p=point(e),ctx=e.currentTarget.getContext("2d")!;ctx.strokeStyle=color;ctx.lineWidth=thickness*2;ctx.lineCap="round";ctx.lineJoin="round";ctx.lineTo(p.x,p.y);ctx.stroke()};const clear=()=>{const c=canvasRef.current;c?.getContext("2d")?.clearRect(0,0,c.width,c.height)};return <div className="grid gap-6 lg:grid-cols-[380px,1fr]"><div className={panel}><div className="flex gap-2"><button className={mode==="typed"?button:secondary} onClick={()=>setMode("typed")}>Typed</button><button className={mode==="draw"?button:secondary} onClick={()=>{setMode("draw");setTimeout(clear)}}>Draw</button></div>{mode==="typed"?<div className="mt-5 space-y-4"><Field label="Name"><input className={control} value={name} onChange={e=>setName(e.target.value)}/></Field><Field label="Signature style"><select className={control} value={font} onChange={e=>setFont(e.target.value)}>{cursiveFonts.map((f,i)=><option key={f} value={f}>Signature {i+1}</option>)}</select></Field></div>:<div className="mt-5"><Field label="Pen thickness"><input className={control} type="range" min="1" max="12" value={thickness} onChange={e=>setThickness(+e.target.value)}/></Field></div>}<div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label="Ink color"><input className={`${control} h-11`} type="color" value={color} onChange={e=>setColor(e.target.value)}/></Field><label className="flex items-center gap-2 text-[15px] font-semibold"><input type="checkbox" checked={transparent} onChange={e=>setTransparent(e.target.checked)}/> Transparent PNG</label></div><Actions><button className={secondary} onClick={clear}>Clear</button>{mode==="draw"&&<button className={secondary} onClick={()=>{const c=canvasRef.current,img=history.current.pop();if(c&&img)c.getContext("2d")!.putImageData(img,0,0)}}>Undo</button>}</Actions><p className="mt-4 text-sm leading-6 text-slate-500">Generated signatures are visual assets, not certified electronic signatures and do not automatically carry legal verification.</p></div><div className={panel}><h2 className="text-xl font-semibold">High-resolution signature preview</h2><canvas ref={canvasRef} width="1200" height="420" onPointerDown={start} onPointerMove={move} onPointerUp={()=>drawing.current=false} onPointerCancel={()=>drawing.current=false} className="mt-4 h-auto min-h-[220px] w-full touch-none rounded-2xl border bg-[linear-gradient(45deg,#eee_25%,transparent_25%),linear-gradient(-45deg,#eee_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#eee_75%),linear-gradient(-45deg,transparent_75%,#eee_75%)] bg-[length:20px_20px]"/><Actions>{(["png","jpg","pdf"]as const).map(k=><button key={k} className={k==="png"?button:secondary} onClick={()=>downloadCanvas(canvasRef.current!,"signature",k)}>Download {k.toUpperCase()}</button>)}</Actions></div></div>}
+const wordSearchPresets: Record<PuzzleDifficulty, WordSearchToggles> = {
+  easy: { horizontal: true, vertical: true, diagonal: false, backwards: false },
+  medium: { horizontal: true, vertical: true, diagonal: true, backwards: false },
+  hard: { horizontal: true, vertical: true, diagonal: true, backwards: true },
+};
+
+function buildWordSearchDirections(toggles: WordSearchToggles): Array<[number, number]> {
+  const directions: Array<[number, number]> = [];
+  if (toggles.horizontal) directions.push([0, 1]);
+  if (toggles.vertical) directions.push([1, 0]);
+  if (toggles.diagonal) directions.push([1, 1], [-1, 1]);
+  if (toggles.backwards) {
+    if (toggles.horizontal) directions.push([0, -1]);
+    if (toggles.vertical) directions.push([-1, 0]);
+    if (toggles.diagonal) directions.push([-1, -1], [1, -1]);
+    if (!toggles.horizontal && !toggles.vertical && !toggles.diagonal) directions.push([0, -1], [-1, 0]);
+  }
+  return directions.length ? directions : [[0, 1]];
+}
+
+const wordSearchSizeGuide = [
+  { grid: "10 × 10", words: "3–8 short words", audience: "Ages 6–8 · first puzzles and small vocabulary sets" },
+  { grid: "12 × 12", words: "8–12 words", audience: "Ages 7–9 · spelling lists" },
+  { grid: "15 × 15", words: "10–15 words", audience: "Ages 8–11 · topic vocabulary" },
+  { grid: "18 × 18", words: "12–20 words", audience: "Ages 10–13 · longer lists" },
+  { grid: "20 × 20", words: "15–25 words", audience: "Ages 12+ · revision sets" },
+  { grid: "22 × 22", words: "18–30 words", audience: "Teens and adults · large lists" },
+  { grid: "25 × 25", words: "20–40 words", audience: "Adults · party and staff-room puzzles, the longest lists" },
+];
+
+export function WordSearchTool() {
+  const [words, setWords] = useState("APPLE\nBANANA\nORANGE\nGRAPE\nMANGO");
+  const [size, setSize] = useState(12);
+  const [difficulty, setDifficulty] = useState<PuzzleDifficulty>("medium");
+  const [toggles, setToggles] = useState<WordSearchToggles>(wordSearchPresets.medium);
+  const [title, setTitle] = useState("Fruit Word Search");
+  const [answer, setAnswer] = useState(false);
+  const [seed, setSeed] = useState(0);
+  const directions = useMemo(() => buildWordSearchDirections(toggles), [toggles]);
+  const data = useMemo(
+    () => makeWordSearch(words.split(/\n|,/), size, difficulty, createPuzzleSeed("word-search", seed, words, size, difficulty, JSON.stringify(directions)), directions),
+    [words, size, difficulty, seed, directions],
+  );
+  const wordCount = useMemo(() => words.split(/\n|,/).map((w) => w.trim()).filter(Boolean).length, [words]);
+  const marked = new Set<string>();
+  data.placements.forEach((p) => { for (let i = 0; i < p.word.length; i++) marked.add(`${p.row + p.dr * i}-${p.col + p.dc * i}`); });
+  const setDifficultyPreset = (next: PuzzleDifficulty) => { setDifficulty(next); setToggles(wordSearchPresets[next]); };
+  const drawPng = (withKey: boolean) => {
+    const cellPx = 44, pad = 40, titleHeight = 72, listHeight = 96;
+    const canvas = document.createElement("canvas");
+    canvas.width = size * cellPx + pad * 2;
+    canvas.height = titleHeight + size * cellPx + listHeight;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 32px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(withKey ? `${title} — Answer key` : title, canvas.width / 2, 44);
+    ctx.font = "bold 24px Arial";
+    data.grid.forEach((row, r) => row.forEach((letter, c) => {
+      const x = pad + c * cellPx, y = titleHeight + r * cellPx;
+      if (withKey && marked.has(`${r}-${c}`)) {
+        ctx.fillStyle = "#fde047";
+        ctx.beginPath();
+        ctx.arc(x + cellPx / 2, y + cellPx / 2, cellPx * 0.42, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = "#0f172a";
+      ctx.fillText(letter, x + cellPx / 2, y + cellPx / 2);
+    }));
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= size; i += 1) {
+      ctx.beginPath(); ctx.moveTo(pad + i * cellPx + 0.5, titleHeight); ctx.lineTo(pad + i * cellPx + 0.5, titleHeight + size * cellPx); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad, titleHeight + i * cellPx + 0.5); ctx.lineTo(pad + size * cellPx, titleHeight + i * cellPx + 0.5); ctx.stroke();
+    }
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "#334155";
+    const list = data.placements.map((p) => p.word).join("  •  ");
+    const listLines: string[] = [];
+    let current = "";
+    for (const word of list.split("  •  ")) {
+      const next = current ? `${current}  •  ${word}` : word;
+      if (ctx.measureText(next).width > canvas.width - pad * 2 && current) { listLines.push(current); current = word; } else current = next;
+    }
+    if (current) listLines.push(current);
+    listLines.forEach((line, i) => ctx.fillText(line, canvas.width / 2, titleHeight + size * cellPx + 36 + i * 28));
+    const link = document.createElement("a");
+    link.download = withKey ? "word-search-answer-key.png" : "word-search-puzzle.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+  return <>
+    <WorksheetFrame title={title} controls={<>
+      <Field label="Puzzle title"><input className={control} value={title} onChange={e => setTitle(e.target.value)} /></Field>
+      <Field label="Words (line or comma separated)"><textarea className={control} rows={8} value={words} onChange={e => setWords(e.target.value)} /></Field>
+      <p className="mt-2 text-xs leading-5 text-slate-500">{wordCount} word{wordCount === 1 ? "" : "s"} — lists of 3–40 words work best. Accented words keep their base letter: café becomes CAFE.</p>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Field label="Grid size"><select className={control} value={size} onChange={e => setSize(+e.target.value)}>{[10, 12, 15, 18, 20, 22, 25].map(n => <option key={n}>{n}</option>)}</select></Field>
+        <Field label="Difficulty preset"><select className={control} value={difficulty} onChange={e => setDifficultyPreset(e.target.value as PuzzleDifficulty)}><option>easy</option><option>medium</option><option>hard</option></select></Field>
+      </div>
+      <fieldset className="mt-4">
+        <legend className="text-[15px] font-semibold text-slate-700">Word directions</legend>
+        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+          {(["horizontal", "vertical", "diagonal", "backwards"] as const).map((key) => (
+            <label key={key} className="flex items-center gap-2 text-sm font-medium text-slate-700">
+              <input type="checkbox" checked={toggles[key]} onChange={e => setToggles(t => ({ ...t, [key]: e.target.checked }))} />
+              {key[0].toUpperCase() + key.slice(1)}
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-xs leading-5 text-slate-500">The difficulty preset sets these four switches; change any switch to make your own combination — for example diagonals on, backwards off.</p>
+      </fieldset>
+      <label className="mt-4 flex gap-2"><input type="checkbox" checked={answer} onChange={e => setAnswer(e.target.checked)} /> Show highlighted answer key</label>
+      <Actions>
+        <button className={button} onClick={() => setSeed(s => s + 1)}>Generate new puzzle</button>
+        <button className={secondary} onClick={() => drawPng(false)}>Download puzzle PNG</button>
+        <button className={secondary} onClick={() => drawPng(true)}>Download answer key PNG</button>
+      </Actions>
+      {data.failed.length > 0 && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">Could not place: {data.failed.join(", ")}. Choose a larger grid or shorter words.</p>}
+    </>}>
+      <div className="overflow-x-auto"><div className="mx-auto grid w-fit gap-0 border" style={{ gridTemplateColumns: `repeat(${size}, minmax(22px,32px))` }}>{data.grid.flatMap((row, r) => row.map((letter, c) => <span key={`${r}-${c}`} className={`flex aspect-square items-center justify-center border border-slate-100 text-sm font-bold ${answer && marked.has(`${r}-${c}`) ? "rounded-full bg-yellow-300" : ""}`}>{letter}</span>))}</div><p className="mt-6 text-center font-semibold">{data.placements.map(p => p.word).join(" • ")}</p></div>
+      {answer && <div style={{ breakBefore: "page", pageBreakBefore: "always" }} className="mt-10 border-t-2 pt-8"><h3 className="text-center text-xl font-bold">Answer key</h3><p className="mt-2 text-center text-sm text-slate-500">Keep this page — hand out the puzzle above on its own.</p><div className="mx-auto mt-6 grid w-fit gap-0 border" style={{ gridTemplateColumns: `repeat(${size}, minmax(22px,32px))` }}>{data.grid.flatMap((row, r) => row.map((letter, c) => <span key={`${r}-${c}`} className={`flex aspect-square items-center justify-center border border-slate-100 text-sm font-bold ${marked.has(`${r}-${c}`) ? "rounded-full bg-yellow-300" : ""}`}>{letter}</span>))}</div><p className="mt-6 text-center font-semibold">{data.placements.map(p => p.word).join(" • ")}</p></div>}
+    </WorksheetFrame>
+    <section className="mt-8 overflow-x-auto rounded-[28px] border border-slate-200 bg-white p-5 shadow-card sm:p-6">
+      <h2 className="text-xl font-semibold">Which grid size for which word list?</h2>
+      <p className="mt-1 text-sm text-slate-500">Use this table as a starting point — a bigger grid fits more and longer words, and a smaller grid keeps a short list from feeling lost. Younger solvers do best with across-and-down words only.</p>
+      <table className="mt-4 w-full min-w-[560px] border-collapse text-sm">
+        <thead><tr className="border-b text-left"><th className="py-2 pr-3">Grid</th><th className="py-2 pr-3">Words</th><th className="py-2 pr-3">Best for</th></tr></thead>
+        <tbody>{wordSearchSizeGuide.map((row) => <tr key={row.grid} className="border-b"><td className="py-2 pr-3 font-semibold">{row.grid}</td><td className="py-2 pr-3">{row.words}</td><td className="py-2 pr-3">{row.audience}</td></tr>)}</tbody>
+      </table>
+    </section>
+  </>;
+}
+
+export function SignatureTool(){const [mode,setMode]=useState<"typed"|"draw">("typed");const [name,setName]=useState("Alex Morgan");const [font,setFont]=useState(cursiveFonts[1]);const [color,setColor]=useState("#111827");const [thickness,setThickness]=useState(4);const [transparent,setTransparent]=useState(true);const canvasRef=useRef<HTMLCanvasElement>(null);const drawing=useRef(false);const history=useRef<ImageData[]>([]);const renderTyped=()=>{const c=canvasRef.current;if(!c)return;const x=c.getContext("2d")!;x.clearRect(0,0,c.width,c.height);if(!transparent){x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height)}x.fillStyle=color;x.textAlign="center";x.textBaseline="middle";x.font=`112px ${resolveCanvasFontFamily(font)}`;x.fillText(name,c.width/2,c.height/2)};useEffect(()=>{void document.fonts.ready.then(renderTyped)},[name,font,color,transparent,mode]);const point=(e:ReactPointerEvent<HTMLCanvasElement>)=>{const rect=e.currentTarget.getBoundingClientRect();return{x:(e.clientX-rect.left)*e.currentTarget.width/rect.width,y:(e.clientY-rect.top)*e.currentTarget.height/rect.height}};const start=(e:ReactPointerEvent<HTMLCanvasElement>)=>{if(mode!=="draw")return;e.currentTarget.setPointerCapture(e.pointerId);const ctx=e.currentTarget.getContext("2d")!;history.current.push(ctx.getImageData(0,0,e.currentTarget.width,e.currentTarget.height));const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);drawing.current=true};const move=(e:ReactPointerEvent<HTMLCanvasElement>)=>{if(!drawing.current)return;const p=point(e),ctx=e.currentTarget.getContext("2d")!;ctx.strokeStyle=color;ctx.lineWidth=thickness*2;ctx.lineCap="round";ctx.lineJoin="round";ctx.lineTo(p.x,p.y);ctx.stroke()};const clear=()=>{const c=canvasRef.current;c?.getContext("2d")?.clearRect(0,0,c.width,c.height)};return <div className="grid gap-6 lg:grid-cols-[380px,1fr]"><div className={panel}><div className="flex gap-2"><button className={mode==="typed"?button:secondary} onClick={()=>setMode("typed")}>Typed</button><button className={mode==="draw"?button:secondary} onClick={()=>{setMode("draw");setTimeout(clear)}}>Draw</button></div>{mode==="typed"?<div className="mt-5 space-y-4"><Field label="Name"><input className={control} value={name} onChange={e=>setName(e.target.value)}/></Field><Field label="Signature style"><select className={control} value={font} onChange={e=>setFont(e.target.value)}>{cursiveFonts.map((f,i)=><option key={f} value={f}>{cursiveFontNames[i]}</option>)}</select></Field></div>:<div className="mt-5"><Field label="Pen thickness"><input className={control} type="range" min="1" max="12" value={thickness} onChange={e=>setThickness(+e.target.value)}/></Field></div>}<div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"><Field label="Ink color"><input className={`${control} h-11`} type="color" value={color} onChange={e=>setColor(e.target.value)}/></Field><label className="flex items-center gap-2 text-[15px] font-semibold"><input type="checkbox" checked={transparent} onChange={e=>setTransparent(e.target.checked)}/> Transparent PNG</label></div><Actions><button className={secondary} onClick={clear}>Clear</button>{mode==="draw"&&<button className={secondary} onClick={()=>{const c=canvasRef.current,img=history.current.pop();if(c&&img)c.getContext("2d")!.putImageData(img,0,0)}}>Undo</button>}</Actions><p className="mt-4 text-sm leading-6 text-slate-500">Generated signatures are visual assets, not certified electronic signatures and do not automatically carry legal verification.</p></div><div className={panel}><h2 className="text-xl font-semibold">High-resolution signature preview</h2><canvas ref={canvasRef} width="1200" height="420" onPointerDown={start} onPointerMove={move} onPointerUp={()=>drawing.current=false} onPointerCancel={()=>drawing.current=false} className="mt-4 h-auto min-h-[220px] w-full touch-none rounded-2xl border bg-[linear-gradient(45deg,#eee_25%,transparent_25%),linear-gradient(-45deg,#eee_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#eee_75%),linear-gradient(-45deg,transparent_75%,#eee_75%)] bg-[length:20px_20px]"/><Actions>{(["png","jpg","pdf"]as const).map(k=><button key={k} className={k==="png"?button:secondary} onClick={()=>downloadCanvas(canvasRef.current!,"signature",k)}>Download {k.toUpperCase()}</button>)}</Actions></div></div>}
 
 export function WordScrambleTool(){const [source,setSource]=useState("planet\nteacher\npencil\nwindow");const [difficulty,setDifficulty]=useState<PuzzleDifficulty>("medium");const [title,setTitle]=useState("Word Scramble");const [hints,setHints]=useState(true);const [answers,setAnswers]=useState(true);const [seed,setSeed]=useState(0);const words=useMemo(()=>source.split(/\n|,/).map(w=>w.trim()).filter(w=>/^[\p{L}\p{N} '-]+$/u.test(w)).slice(0,50),[source]);const scrambled=useMemo(()=>{const random=createSeededRandom(createPuzzleSeed("word-scramble",seed,source,difficulty));return words.map(w=>scrambleWord(w,difficulty,random))},[words,source,difficulty,seed]);return <WorksheetFrame title={title} controls={<><Field label="Worksheet title"><input className={control} value={title} onChange={e=>setTitle(e.target.value)}/></Field><Field label="Words"><textarea className={control} rows={8} value={source} onChange={e=>setSource(e.target.value)}/></Field><Field label="Difficulty"><select className={control} value={difficulty} onChange={e=>setDifficulty(e.target.value as PuzzleDifficulty)}><option>easy</option><option>medium</option><option>hard</option></select></Field><div className="mt-4 flex gap-5"><label><input type="checkbox" checked={hints} onChange={e=>setHints(e.target.checked)}/> Hints</label><label><input type="checkbox" checked={answers} onChange={e=>setAnswers(e.target.checked)}/> Answer key</label></div><Actions><button className={button} onClick={()=>setSeed(s=>s+1)}>Regenerate</button><button className={secondary} onClick={()=>navigator.clipboard.writeText(scrambled.join("\n"))}>Copy output</button></Actions></>}><ol className="list-decimal space-y-4 pl-6">{scrambled.map((s,i)=><li key={i}><strong className="tracking-[.25em]">{s}</strong>{hints&&<span className="ml-3 text-sm text-slate-500">({words[i].length} letters, starts with {words[i][0]})</span>} <span className="block border-b border-slate-300 pt-3"/></li>)}</ol>{answers&&<div className="mt-10 border-t-2 pt-5"><h3 className="font-bold">Answer key</h3><p className="mt-3">{words.map((w,i)=>`${i+1}. ${w}`).join("  •  ")}</p></div>}</WorksheetFrame>}
 

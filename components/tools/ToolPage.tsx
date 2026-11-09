@@ -56,5 +56,14 @@ export async function ToolPage({ slug, children }: { slug: NewToolSlug; children
       <article className="rounded-[32px] border border-blue-100 bg-blue-50 p-7 lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Related tools</h2><div className="mt-4 flex flex-wrap gap-3">{related.map((item) => <Link key={item.slug} href={`/${item.slug}`} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-blue shadow-sm hover:bg-blue-100">{item.name}</Link>)}<Link href="/tools" className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white">View all tools</Link></div></article>
       <article className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-card lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Frequently asked questions</h2><div className="mt-5 grid gap-5 md:grid-cols-3">{faqPairs.map(([question,answer])=><div key={question}><h3 className="font-semibold">{question}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{answer}</p></div>)}</div></article>
     </section>}
+    {!cms?.content_html&&supporting?.guide&&<section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+      <div className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-card lg:p-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-blue">In-depth guide</p>
+        {supporting.guide.map((section) => <div key={section.heading} className="mt-8 first:mt-6">
+          <h2 className="text-2xl font-semibold text-slate-950">{section.heading}</h2>
+          <div className="mt-4 max-w-3xl space-y-5">{section.paragraphs.map((paragraph, index) => <p key={index} className="leading-8 text-slate-600">{paragraph}</p>)}</div>
+        </div>)}
+      </div>
+    </section>}
   </main>;
 }
