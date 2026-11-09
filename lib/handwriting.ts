@@ -437,10 +437,39 @@ function drawCoverImage(ctx: CanvasRenderingContext2D, image: HTMLImageElement, 
   ctx.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
 }
 
-function fontForChar(style: HandwritingStyle, ctx: CanvasRenderingContext2D, size: number, charSeed: number) {
+function fontForChar(style: HandwritingStyle, ctx: CanvasRenderingContext2D, size: number, charSeed: number, char: string) {
+  const script = scriptOf(char);
+  if (script !== "latin") {
+    // Devanagari and Arabic-script characters render in their own font:
+    // the Latin handwriting fonts have no glyphs for them.
+    ctx.font = `${style.weight} ${size}px ${scriptFont(script)}`;
+    return;
+  }
   const familyPool = [style.primary, ...style.alternates];
   const family = charSeed % 9 === 0 ? familyPool[charSeed % familyPool.length] : style.primary;
   ctx.font = `${style.weight} ${size}px ${family}`;
+}
+
+/** Devanagari (U+0900–U+097F) and Arabic-script (U+0600–U+06FF and friends) ranges. */
+export function scriptOf(text: string): "devanagari" | "arabic" | "latin" {
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code >= 0x0900 && code <= 0x097f) return "devanagari";
+    if ((code >= 0x0600 && code <= 0x06ff) || (code >= 0x0750 && code <= 0x077f) || (code >= 0xfb50 && code <= 0xfdff) || (code >= 0xfe70 && code <= 0xfeff)) return "arabic";
+  }
+  return "latin";
+}
+
+export function scriptFont(script: "devanagari" | "arabic"): string {
+  // Hindi words render in Kalam (the one handwriting font here with a
+  // Devanagari design); Urdu words render in Noto Nastaliq Urdu.
+  return script === "devanagari" ? '"Kalam", cursive' : '"Noto Nastaliq Urdu", serif';
+}
+
+/** True when the line starts with an Arabic-script word: lay its words out right-to-left. */
+function isRtlLine(line: string) {
+  const first = line.trim().split(/\s+/)[0] ?? "";
+  return scriptOf(first) === "arabic";
 }
 
 interface RenderLine {
@@ -458,15 +487,36 @@ function measureTextWithSize(
   charSpacing = 0,
 ) {
   let width = 0;
-  for (let index = 0; index < text.length; index += 1) {
-    const char = text[index];
-    fontForChar(style, ctx, size, index);
-    if (char === " ") {
-      width += size * 0.38 * settings.wordSpacing;
-    } else {
-      width += ctx.measureText(char).width;
+  let charIndex = 0;
+  // Measure word by word: Devanagari and Arabic-script words are measured
+  // as whole words in their own font (per-character widths are meaningless
+  // for combining marks and joining letters), Latin words per character.
+  for (const part of text.split(/(\s+)/)) {
+    if (!part) continue;
+    if (/^\s+$/.test(part)) {
+      for (let index = 0; index < part.length; index += 1) {
+        width += size * 0.38 * settings.wordSpacing;
+        width += charSpacing + settings.letterSpacing;
+      }
+      // Keep the alternate-font cadence aligned with the character's
+      // position in the full string, as the previous per-character loop did.
+      charIndex += part.length;
+      continue;
     }
-    width += charSpacing + settings.letterSpacing;
+    const script = scriptOf(part);
+    if (script !== "latin") {
+      ctx.font = `${style.weight} ${size}px ${scriptFont(script)}`;
+      width += ctx.measureText(part).width + part.length * (charSpacing + settings.letterSpacing);
+      charIndex += part.length;
+      continue;
+    }
+    for (let index = 0; index < part.length; index += 1) {
+      const char = part[index];
+      fontForChar(style, ctx, size, charIndex, char);
+      charIndex += 1;
+      width += ctx.measureText(char).width;
+      width += charSpacing + settings.letterSpacing;
+    }
   }
   return width;
 }
@@ -535,6 +585,41 @@ function splitIntoLines(
   return blocks;
 }
 
+/**
+ * Draw one whole word with a single fillText call. Devanagari combining
+ * marks and Arabic-script joining only shape correctly when the word is
+ * drawn as a unit — drawing them character by character breaks conjuncts,
+ * vowel signs, and letter joins. Latin words in right-to-left lines are
+ * also drawn as units so their internal order stays left-to-right.
+ */
+function drawWord(
+  ctx: CanvasRenderingContext2D,
+  word: string,
+  x: number,
+  baselineY: number,
+  style: HandwritingStyle,
+  settings: RenderSettings,
+  rng: () => number,
+  ink: string,
+  intensity: number,
+) {
+  const script = scriptOf(word);
+  const font = script === "latin" ? style.primary : scriptFont(script);
+  const size = settings.fontSize + (rng() - 0.5) * style.sizeJitter * settings.randomness * settings.fontSize * 0.05;
+  ctx.font = `${style.weight} ${size}px ${font}`;
+  ctx.fillStyle = ink;
+  ctx.globalAlpha = intensity + rng() * 0.05;
+  const jitterX = (rng() - 0.5) * style.xJitter * settings.randomness * 1.1;
+  const jitterY = (rng() - 0.5) * style.yJitter * settings.randomness * 0.8;
+  const angle = style.slant * 0.5 + (rng() - 0.5) * style.rotateJitter * settings.randomness * 1.1;
+  ctx.save();
+  ctx.translate(x + jitterX, baselineY + jitterY);
+  ctx.rotate(angle);
+  ctx.fillText(word, 0, 0);
+  ctx.restore();
+  return ctx.measureText(word).width + settings.letterSpacing * word.length + rng() * settings.randomness * 0.7;
+}
+
 function drawLine(
   ctx: CanvasRenderingContext2D,
   line: string,
@@ -544,34 +629,65 @@ function drawLine(
   settings: RenderSettings,
   rng: () => number,
 ) {
-  let x = originX;
   const ink = settings.inkColor === "custom" && /^#[0-9a-f]{6}$/i.test(settings.customInkColor) ? settings.customInkColor : colorMap[settings.inkColor];
   const intensity = style.pressure - settings.randomness * 0.06;
 
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    if (char === " ") {
-      x += settings.fontSize * 0.38 * settings.wordSpacing + rng() * settings.randomness * 1.8;
+  if (isRtlLine(line)) {
+    // Right-to-left line: lay words out from the right edge, each word
+    // drawn as a unit so Arabic-script joining stays intact.
+    const lineWidth = measureText(ctx, line, style, settings);
+    let x = originX + lineWidth;
+    for (const token of line.split(/(\s+)/).reverse()) {
+      if (!token) continue;
+      if (/^\s+$/.test(token)) {
+        for (let index = 0; index < token.length; index += 1) x -= settings.fontSize * 0.38 * settings.wordSpacing + settings.letterSpacing;
+        continue;
+      }
+      const wordWidth = measureText(ctx, token, style, settings);
+      drawWord(ctx, token, x - wordWidth, baselineY, style, settings, rng, ink, intensity);
+      x -= wordWidth;
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  let x = originX;
+  let charIndex = 0;
+  for (const token of line.split(/(\s+)/)) {
+    if (!token) continue;
+    if (/^\s+$/.test(token)) {
+      for (let index = 0; index < token.length; index += 1) {
+        x += settings.fontSize * 0.38 * settings.wordSpacing + rng() * settings.randomness * 1.8;
+      }
+      charIndex += token.length;
       continue;
     }
+    if (scriptOf(token) !== "latin") {
+      x += drawWord(ctx, token, x, baselineY, style, settings, rng, ink, intensity);
+      charIndex += token.length;
+      continue;
+    }
+    for (let index = 0; index < token.length; index += 1) {
+      const char = token[index];
+      const size =
+        settings.fontSize + (rng() - 0.5) * style.sizeJitter * settings.randomness * settings.fontSize * 0.1;
+      fontForChar(style, ctx, size, charIndex, char);
+      charIndex += 1;
+      ctx.fillStyle = ink;
+      ctx.globalAlpha = intensity + rng() * 0.05;
 
-    const size =
-      settings.fontSize + (rng() - 0.5) * style.sizeJitter * settings.randomness * settings.fontSize * 0.1;
-    fontForChar(style, ctx, size, index);
-    ctx.fillStyle = ink;
-    ctx.globalAlpha = intensity + rng() * 0.05;
+      const jitterX = (rng() - 0.5) * style.xJitter * settings.randomness * 2.2;
+      const jitterY = (rng() - 0.5) * style.yJitter * settings.randomness * 1.6;
+      const angle = style.slant * 0.5 + (rng() - 0.5) * style.rotateJitter * settings.randomness * 2.2;
 
-    const jitterX = (rng() - 0.5) * style.xJitter * settings.randomness * 2.2;
-    const jitterY = (rng() - 0.5) * style.yJitter * settings.randomness * 1.6;
-    const angle = style.slant * 0.5 + (rng() - 0.5) * style.rotateJitter * settings.randomness * 2.2;
+      ctx.save();
+      ctx.translate(x + jitterX, baselineY + jitterY);
+      ctx.rotate(angle);
+      ctx.fillText(char, 0, 0);
+      ctx.restore();
 
-    ctx.save();
-    ctx.translate(x + jitterX, baselineY + jitterY);
-    ctx.rotate(angle);
-    ctx.fillText(char, 0, 0);
-    ctx.restore();
-
-    x += ctx.measureText(char).width + settings.letterSpacing + rng() * settings.randomness * 0.7;
+      x += ctx.measureText(char).width + settings.letterSpacing + rng() * settings.randomness * 0.7;
+    }
   }
 
   ctx.globalAlpha = 1;
@@ -647,6 +763,20 @@ export async function renderHandwriting(text: string, settings: RenderSettings, 
   }
 
   const sanitized = text.trim() || "Write your notes here...";
+
+  // Load the non-Latin handwriting fonts before drawing, so the first
+  // render does not fall back to a system font for Hindi or Urdu words.
+  if ("fonts" in document) {
+    const loadWithTimeout = (font: string, sample: string) => Promise.race([
+      document.fonts.load(font, sample).catch(() => []),
+      new Promise((resolve) => {
+        window.setTimeout(resolve, fontReadyTimeoutMs);
+      }),
+    ]);
+    if (/[\u0900-\u097F]/.test(sanitized)) await loadWithTimeout("34px Kalam", "हिन्दी");
+    if (/[\u0600-\u06FF]/.test(sanitized)) await loadWithTimeout('34px "Noto Nastaliq Urdu"', "اردو");
+  }
+
   const style = chooseStyle(settings.styleId);
   const seed = hashString(`${sanitized}::${JSON.stringify(settings)}`);
   const rng = mulberry32(seed);

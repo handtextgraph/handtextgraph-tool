@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { PaperSvg } from "@/components/paper/PaperSvg";
 import { buildGeneratorPageModel, type GeneratorDocumentSpec, type GeneratorOrientation, type GeneratorPaperSize } from "@/lib/paper-generator-engine";
-import { MM_PER_INCH } from "@/lib/paper-engine";
+import { getPaperDimensions, MM_PER_INCH } from "@/lib/paper-engine";
 import { getPaperGenerator, type GeneratorValues, type PaperGeneratorSlug } from "@/lib/paper-generators";
 import { getLibraryTemplate } from "@/lib/template-library";
 
@@ -29,6 +29,24 @@ export function PaperGeneratorStudio({ slug }: { slug: PaperGeneratorSlug }) {
   const downloadSvg=async()=>{if(!result.model)return;setStatus("Preparing vector SVG…");try{const{downloadPaperGeneratorSvg}=await import("@/lib/paper-generator-svg");downloadPaperGeneratorSvg(result.model,filename);setStatus("SVG downloaded.")}catch{setStatus("SVG creation failed. Reduce pattern detail and try again.")}};
   const display=(mm:number)=>unit==="mm"?Number(mm.toFixed(2)):Number((mm/MM_PER_INCH).toFixed(3));
   const fromDisplay=(value:number)=>unit==="mm"?value:value*MM_PER_INCH;
+  // Live counts computed from the same geometry the engine draws: printable
+  // area is the page minus the margins on each side, lines/squares step by
+  // the chosen spacing. Lined pages count drawn lines; graph pages count
+  // grid lines per side (columns × rows).
+  const sizeLabel = sizes.find(([key])=>key===size)?.[1].split(" — ")[0] ?? size;
+  const readout = useMemo(()=>{
+    const dims = getPaperDimensions(size, orientation);
+    if (slug === "lined-paper-generator") {
+      const lines = Math.floor((dims.height - margin * 2) / values.spacingMm) + 1;
+      return `${lines} lines on ${sizeLabel} (${orientation})`;
+    }
+    if (slug === "graph-paper-generator") {
+      const cols = Math.floor((dims.width - margin * 2) / values.spacingMm) + 1;
+      const rows = Math.floor((dims.height - margin * 2) / values.spacingMm) + 1;
+      return `${cols} × ${rows} = ${(cols * rows).toLocaleString()} squares on ${sizeLabel} (${orientation})`;
+    }
+    return null;
+  },[slug, size, orientation, margin, values.spacingMm, sizeLabel]);
   return <section aria-label={`${definition.name} workspace`} className="rounded-[32px] border border-platform-border bg-platform-ice p-4 shadow-card sm:p-6 lg:p-8">
     <div className="grid items-start gap-6 xl:grid-cols-[390px_minmax(0,1fr)]">
       <div className="rounded-[26px] border border-platform-border bg-white p-5 sm:p-6">
@@ -50,7 +68,7 @@ export function PaperGeneratorStudio({ slug }: { slug: PaperGeneratorSlug }) {
         <div className="mt-6 grid grid-cols-2 gap-2"><button disabled={!result.model} onClick={()=>void downloadPdf()} className="min-h-11 rounded-full bg-platform-teal px-4 text-sm font-bold text-white disabled:opacity-50">Download PDF</button><button disabled={!result.model} onClick={()=>void downloadPng()} className="min-h-11 rounded-full bg-platform-navy px-4 text-sm font-bold text-white disabled:opacity-50">Download PNG</button><button disabled={!result.model} onClick={()=>void downloadSvg()} className="min-h-11 rounded-full border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 disabled:opacity-50">Download SVG</button><button disabled={!result.model} onClick={()=>window.print()} className="min-h-11 rounded-full border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 disabled:opacity-50">Print</button></div>
         <p role="status" aria-live="polite" className="mt-4 text-sm leading-6 text-slate-600">{status}</p>
       </div>
-      <div className="xl:sticky xl:top-24"><div className="rounded-[26px] border border-platform-border bg-slate-200/70 p-3 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="font-heading text-xl font-bold text-platform-navy">Live preview</h2><span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600">{result.model?`${result.model.widthMm} × ${result.model.heightMm} mm`:"Invalid settings"}</span></div>{result.model?<PaperSvg model={result.model} className="mx-auto h-auto max-h-[78vh] w-full rounded bg-white shadow-paper" ariaLabel={`${definition.name} preview`}/>:<div className="grid min-h-96 place-items-center rounded bg-white p-8 text-center text-slate-500">Adjust the values to create a valid preview.</div>}</div><p className="mt-3 text-sm leading-6 text-slate-600">Measurements are stored in millimetres. Inch inputs are converted at 25.4 mm per inch. Print PDFs at Actual size or 100%.</p></div>
+      <div className="xl:sticky xl:top-24"><div className="rounded-[26px] border border-platform-border bg-slate-200/70 p-3 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="font-heading text-xl font-bold text-platform-navy">Live preview</h2><span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600">{result.model?`${result.model.widthMm} × ${result.model.heightMm} mm`:"Invalid settings"}</span></div>{readout&&<p className="mb-4 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600">{readout}</p>}{result.model?<PaperSvg model={result.model} className="mx-auto h-auto max-h-[78vh] w-full rounded bg-white shadow-paper" ariaLabel={`${definition.name} preview`}/>:<div className="grid min-h-96 place-items-center rounded bg-white p-8 text-center text-slate-500">Adjust the values to create a valid preview.</div>}</div><p className="mt-3 text-sm leading-6 text-slate-600">Measurements are stored in millimetres. Inch inputs are converted at 25.4 mm per inch. Print PDFs at Actual size or 100%.</p></div>
     </div>
     {result.model?<><div className="paper-generator-print" aria-hidden="true"><PaperSvg model={result.model} className="paper-generator-print-sheet"/></div><style>{`.paper-generator-print{display:none}@media print{@page{size:${result.model.widthMm}mm ${result.model.heightMm}mm;margin:0}body *{visibility:hidden!important}.paper-generator-print,.paper-generator-print *{visibility:visible!important}.paper-generator-print{display:block!important;position:absolute;inset:0}.paper-generator-print-sheet{display:block;width:${result.model.widthMm}mm;height:${result.model.heightMm}mm}}`}</style></>:null}
   </section>;

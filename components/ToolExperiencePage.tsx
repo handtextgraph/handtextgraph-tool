@@ -251,7 +251,7 @@ function PdfPageDetails() {
           </h2>
           <p className="mt-4 text-lg leading-8 text-slate-600">
             Upload a text-based PDF or enter text manually, then use the existing controls to create new handwritten-style
-            pages. The importer preserves page order as plain text rather than recreating the original visual layout.
+            pages. Enter text in the editor first, or upload a PDF below it — the importer preserves page order as plain text rather than recreating the original visual layout.
           </p>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">

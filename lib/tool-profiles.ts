@@ -1,4 +1,4 @@
-import { defaultSettings, type RenderSettings } from "@/lib/handwriting";
+import { defaultSettings, type PageSize, type RenderSettings } from "@/lib/handwriting";
 
 export type ToolProfile = "default" | "lined" | "graph" | "notes" | "pdf" | "word";
 
@@ -10,7 +10,17 @@ type ToolProfileConfig = {
   starterText: string;
   fileName: string;
   settings: RenderSettings;
+  /**
+   * Paper sizes the profile's own page text promises. Every profile offers
+   * all five sizes and landscape except "pdf", whose page states A4 or
+   * Letter with no landscape output — the editor dropdown must match that
+   * instead of offering sizes the page says it does not support.
+   */
+  allowedPageSizes: PageSize[];
+  allowLandscape: boolean;
 };
+
+const allPageSizes: PageSize[] = ["a3", "a4", "a5", "letter", "legal"];
 
 export const toolProfiles: Record<ToolProfile, ToolProfileConfig> = {
   default: {
@@ -25,6 +35,8 @@ This page is a simple example for planning, teaching, journaling, or creative la
 
 When the page looks right, export it as a PDF, PNG, or JPG.`,
     fileName: "handwriting-pages",
+    allowedPageSizes: allPageSizes,
+    allowLandscape: true,
     settings: defaultSettings,
   },
   lined: {
@@ -38,6 +50,8 @@ Use a readable handwriting style, comfortable line spacing, and a visible left m
 
 Preview the complete A4 page before downloading it as PDF, PNG, or JPG.`,
     fileName: "lined-paper-handwriting",
+    allowedPageSizes: allPageSizes,
+    allowLandscape: true,
     settings: {
       ...defaultSettings,
       pageType: "lined",
@@ -64,6 +78,8 @@ Method: Keep the mass constant, change the string length, and record each observ
 
 Result: Use the grid as a visual structure for notes and add diagrams separately.`,
     fileName: "graph-paper-handwriting",
+    allowedPageSizes: allPageSizes,
+    allowLandscape: true,
     settings: {
       ...defaultSettings,
       pageType: "graph",
@@ -95,6 +111,8 @@ Carbon dioxide, water, and light.
 Quick check:
 Where does the light-dependent stage occur?`,
     fileName: "handwritten-notes",
+    allowedPageSizes: allPageSizes,
+    allowLandscape: true,
     settings: {
       ...defaultSettings,
       pageType: "lined",
@@ -113,13 +131,16 @@ Where does the light-dependent stage occur?`,
     eyebrow: "PDF Handwriting Tool",
     editorTitle: "Convert PDF text into handwritten pages",
     inputLabel: "Edit the imported text, or type and paste text manually",
-    placeholder: "Upload a text-based PDF above, or paste the text you want to turn into handwritten pages...",
+    placeholder: "Type or paste the text you want to turn into handwritten pages, or upload a text-based PDF below...",
     starterText: `PDF to Handwriting Draft
 
-Upload a text-based PDF to extract its selectable text, or replace this example with text you type or paste manually.
+Type or paste your text, or upload a text-based PDF to extract its selectable text.
 
 Choose A4 or Letter, review every page, set the filename and PDF quality, then export the current page or the complete document.`,
     fileName: "text-to-handwriting",
+    // The PDF page promises A4 or Letter with no landscape output.
+    allowedPageSizes: ["a4", "letter"],
+    allowLandscape: false,
     settings: {
       ...defaultSettings,
       pageSize: "a4",
@@ -139,6 +160,8 @@ Upload a .docx file to extract its text in your browser, or replace this example
 
 Review the editable text, choose a supported paper size and orientation, preview every page, then export the result as PDF, PNG, or JPG.`,
     fileName: "word-to-handwriting",
+    allowedPageSizes: allPageSizes,
+    allowLandscape: true,
     settings: {
       ...defaultSettings,
       pageSize: "a4",

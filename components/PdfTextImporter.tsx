@@ -72,7 +72,7 @@ export function PdfTextImporter({ onTextExtracted }: { onTextExtracted: (text: s
         setStatus(`Extracting PDF page ${pageNumber} (${currentPage} of ${totalPages})…`);
       }, controller.signal);
       onTextExtracted(text);
-      setStatus("Text extracted. You can edit it below.");
+      setStatus("Text extracted. You can edit it in the editor above.");
       trackEvent("pdf_import_completed", { tool_profile: "pdf" });
     } catch (caughtError) {
       setStatus("");

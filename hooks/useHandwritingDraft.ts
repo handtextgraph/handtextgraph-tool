@@ -35,7 +35,7 @@ function isRenderSettings(value: unknown): value is RenderSettings {
     typeof settings.topMargin === "number" &&
     typeof settings.bottomMargin === "number" &&
     typeof settings.paragraphIndentMode === "boolean" &&
-    ["a4", "letter"].includes(settings.pageSize ?? "") &&
+    ["a3", "a4", "a5", "letter", "legal"].includes(settings.pageSize ?? "") &&
     ["low", "medium", "high"].includes(settings.pdfQuality ?? "") &&
     typeof settings.paperBrightness === "number" &&
     typeof settings.showMarginLine === "boolean" &&
