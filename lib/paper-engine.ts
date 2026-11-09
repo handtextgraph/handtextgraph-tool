@@ -17,7 +17,7 @@ export const paperSizesMm: Record<PaperSize, { width: number; height: number }> 
 
 type PatternStyle = { color: string; lineWidthMm: number };
 export type SquareGridSpec = PatternStyle & { kind: "square-grid"; spacingMm: number };
-export type LinedPaperSpec = PatternStyle & { kind: "lined"; spacingMm: number };
+export type LinedPaperSpec = PatternStyle & { kind: "lined"; spacingMm: number; marginLine?: boolean };
 export type DotGridSpec = PatternStyle & { kind: "dot-grid"; spacingMm: number; radiusMm: number };
 export type BlankPaperSpec = { kind: "blank" };
 export type GuidedPaperSpec = PatternStyle & { kind: "guided"; rowHeightMm: number; midlineColor: string; baselineColor: string; dashMm: number[] };
@@ -97,6 +97,7 @@ export function buildPaperPageModel(input: PaperDocumentSpec): PaperPageModel {
   if (pattern.kind === "lined" || pattern.kind === "square-grid") {
     for (let y = top; y <= bottom + 0.0001; y += pattern.spacingMm) push(primitives, { kind: "line", x1: left, y1: y, x2: right, y2: y, color: pattern.color, width: pattern.lineWidthMm });
     if (pattern.kind === "square-grid") for (let x = left; x <= right + 0.0001; x += pattern.spacingMm) push(primitives, { kind: "line", x1: x, y1: top, x2: x, y2: bottom, color: pattern.color, width: pattern.lineWidthMm });
+    if (pattern.kind === "lined" && pattern.marginLine) push(primitives, { kind: "line", x1: left + 20, y1: top, x2: left + 20, y2: bottom, color: "#dc6b73", width: Math.max(0.25, pattern.lineWidthMm * 1.8) });
   } else if (pattern.kind === "dot-grid") {
     for (let y = top; y <= bottom + 0.0001; y += pattern.spacingMm) for (let x = left; x <= right + 0.0001; x += pattern.spacingMm) push(primitives, { kind: "circle", x, y, radius: pattern.radiusMm, color: pattern.color });
   } else if (pattern.kind === "guided") {
