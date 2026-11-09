@@ -11,10 +11,32 @@ export async function ToolPage({ slug, children }: { slug: NewToolSlug; children
   const cms = await publicToolContent(slug);
   const name = cms?.display_name || tool.name;
   const description = cms?.description || cms?.intro || tool.description;
-  const related = newTools.filter((item) => item.slug !== slug && item.category === tool.category).slice(0, 3);
+  // Related tools rotate through the category (starting after this tool and
+  // wrapping) instead of always taking the first three: otherwise tools added
+  // later in a category never appear in any sibling's related-tools block.
+  const sameCategory = newTools.filter((item) => item.category === tool.category);
+  const selfIndex = sameCategory.findIndex((item) => item.slug === slug);
+  const related = [...sameCategory.slice(selfIndex + 1), ...sameCategory.slice(0, selfIndex)].slice(0, 3);
   const supporting = stage5Content[slug];
+  // The FAQ block below only renders when there is no CMS content_html, so
+  // the FAQPage schema must use exactly the same list the page shows.
+  const faqPairs: [string, string][] = cms?.content_html
+    ? []
+    : cms?.faqs?.length
+      ? cms.faqs.map((entry) => { const [q, ...a] = entry.split("|"); return [q.trim(), a.join("|").trim()] as [string, string]; })
+      : supporting?.faqs || [["Is it free?", "The browser-based features are free and require no account."], ["Does it work on phones?", "Yes. Controls and previews adapt to small touch screens."], ["Can I print the result?", "Yes. Use the print control or download a PDF for predictable printing."]];
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqPairs.map(([question, answer]) => ({
+      "@type": "Question",
+      name: question,
+      acceptedAnswer: { "@type": "Answer", text: answer },
+    })),
+  };
   return <main>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(toolSchema(slug))}} />
+    {faqPairs.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(faqSchema).replace(/</g, "\\u003c")}} />}
     <section className="pb-8 pt-12 text-center">
       <PublicContainer className="max-w-5xl">
       <div className="mb-5"><Breadcrumbs items={[{label:"Home",href:"/"},{label:"Tools",href:"/tools"},{label:name}]} /></div>
@@ -32,7 +54,7 @@ export async function ToolPage({ slug, children }: { slug: NewToolSlug; children
       <ContentPanel><h2 className="text-2xl font-semibold text-slate-950">How to use this tool</h2><ol className="mt-4 list-decimal space-y-3 pl-5 leading-7 text-slate-600">{(cms?.instructions?.length?cms.instructions:supporting?.instructions||["Enter or upload your source content in the settings panel.","Adjust the available options and review the live output.","Regenerate when needed, then download, copy, or print the verified result."]).map(step=><li key={step}>{step}</li>)}</ol></ContentPanel>
       <ContentPanel><h2 className="text-2xl font-semibold text-slate-950">Practical uses</h2>{cms?.features?.length||supporting?.uses?<ul className="mt-4 list-disc space-y-2 pl-5 leading-7 text-slate-600">{(cms?.features?.length?cms.features:supporting!.uses).map(feature=><li key={feature}>{feature}</li>)}</ul>:<p className="mt-4 leading-7 text-slate-600">Use it for classroom activities, home learning, printable projects, and quick drafts.</p>}<h3 className="mt-5 text-lg font-semibold text-slate-950">Limitations and privacy</h3><p className="mt-2 leading-7 text-slate-600">{supporting?.limitations||"Preview every result before sharing. Processing happens in this browser and the tool does not require a paid API."}</p></ContentPanel>
       <article className="rounded-[32px] border border-blue-100 bg-blue-50 p-7 lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Related tools</h2><div className="mt-4 flex flex-wrap gap-3">{related.map((item) => <Link key={item.slug} href={`/${item.slug}`} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-blue shadow-sm hover:bg-blue-100">{item.name}</Link>)}<Link href="/tools" className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white">View all tools</Link></div></article>
-      <article className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-card lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Frequently asked questions</h2><div className="mt-5 grid gap-5 md:grid-cols-3">{(cms?.faqs?.length?cms.faqs.map(entry=>{const[q,...a]=entry.split("|");return [q.trim(),a.join("|").trim()] as [string,string]}):supporting?.faqs||[["Is it free?","The browser-based features are free and require no account."],["Does it work on phones?","Yes. Controls and previews adapt to small touch screens."],["Can I print the result?","Yes. Use the print control or download a PDF for predictable printing."]]).map(([question,answer])=><div key={question}><h3 className="font-semibold">{question}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{answer}</p></div>)}</div></article>
+      <article className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-card lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Frequently asked questions</h2><div className="mt-5 grid gap-5 md:grid-cols-3">{faqPairs.map(([question,answer])=><div key={question}><h3 className="font-semibold">{question}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{answer}</p></div>)}</div></article>
     </section>}
   </main>;
 }
