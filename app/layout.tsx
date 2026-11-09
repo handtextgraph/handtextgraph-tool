@@ -93,6 +93,7 @@ const footerGroups = [
 const footerLinks = [
   { href: "/tools", label: "All Tools" },
   { href: "/templates", label: "Templates" },
+  { href: "/guides", label: "Guides" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/responsible-use", label: "Responsible Use" },

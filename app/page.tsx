@@ -17,6 +17,7 @@ const faqs = [
 ] as const;
 
 export default function HomePage(){return <main className="overflow-hidden bg-brand-paper text-brand-ink">
+  <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(([question, answer]) => ({ "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: answer } })) }).replace(/</g, "\\u003c") }} />
   <section className="relative border-b border-[#E8E3DA]">
     <div className="pointer-events-none absolute -left-24 top-24 h-52 w-52 rounded-full border-[42px] border-[#EAF8F5]"/>
     <div className="mx-auto grid min-h-[670px] max-w-7xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:py-20">
