@@ -1,0 +1,1 @@
+import { NumberChartTool } from "@/components/tools/Stage5Tools"; import { ToolPage } from "@/components/tools/ToolPage"; import { toolMetadata } from "@/components/tools/toolMetadata"; export function generateMetadata(){return toolMetadata("number-chart-120")} export default function Page(){return <ToolPage slug="number-chart-120"><NumberChartTool presetKind="120"/></ToolPage>}
