@@ -3,6 +3,10 @@ import {
   TextToHandwritingGuideBody,
   textToHandwritingFaqs,
 } from "./text-to-handwriting";
+import {
+  SignatureGeneratorGuideBody,
+  signatureGeneratorFaqs,
+} from "./signature-generator";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -17,6 +21,10 @@ export const guideContent: Record<string, GuideContent> = {
   "text-to-handwriting": {
     Body: TextToHandwritingGuideBody,
     faqs: textToHandwritingFaqs,
+  },
+  "signature-generator": {
+    Body: SignatureGeneratorGuideBody,
+    faqs: signatureGeneratorFaqs,
   },
 };
 
