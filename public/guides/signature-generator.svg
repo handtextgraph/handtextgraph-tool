@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Signature generator</title>
+  <desc id="desc">A signature drawn in flowing handwriting on a blank page</desc>
+  <rect width="800" height="600" fill="#FFFDF7"/>
+  <circle cx="690" cy="90" r="120" fill="#EAF8F5"/>
+  <circle cx="110" cy="510" r="90" fill="#FFF0ED"/>
+  <!-- paper sheet -->
+  <g transform="rotate(2 400 300)">
+    <rect x="170" y="90" width="460" height="420" rx="10" fill="#FFFFFF" stroke="#D9D5CC" stroke-width="2"/>
+    <!-- faint ruled line the signature sits on -->
+    <line x1="210" y1="330" x2="590" y2="330" stroke="#AFCFC8" stroke-width="2" opacity="0.7"/>
+    <!-- flowing signature strokes -->
+    <g fill="none" stroke="#17324D" stroke-width="5" stroke-linecap="round">
+      <path d="M235 300 C 260 210, 285 250, 300 300 S 340 340, 365 285 S 410 250, 430 300 S 470 330, 495 285 S 540 260, 560 305"/>
+      <path d="M300 310 q 60 22 150 -6" stroke-width="3.5"/>
+    </g>
+    <!-- coral underline flourish -->
+    <path d="M235 345 q 90 18 220 4 q 70 -8 105 -2" fill="none" stroke="#F26B5B" stroke-width="4" stroke-linecap="round"/>
+    <!-- teal dot accent -->
+    <circle cx="575" cy="300" r="6" fill="#218C82"/>
+    <!-- small caption line -->
+    <line x1="235" y1="390" x2="420" y2="390" stroke="#D9D5CC" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- coral pen -->
+  <g transform="rotate(35 640 420)">
+    <rect x="628" y="330" width="24" height="150" rx="10" fill="#F26B5B"/>
+    <path d="M628 480 L640 520 L652 480 Z" fill="#17324D"/>
+    <rect x="628" y="330" width="24" height="26" rx="10" fill="#F4C95D"/>
+  </g>
+</svg>
