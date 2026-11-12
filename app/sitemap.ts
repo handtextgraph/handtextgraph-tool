@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { publicContentList } from "@/lib/cms/public";
+import { getPublishedGuides } from "@/lib/guides";
 import { paperGeneratorSlugs } from "@/lib/paper-generators";
 import { curatedTemplatePages } from "@/lib/template-library";
 import { siteConfig } from "@/lib/site-config";
@@ -42,7 +43,6 @@ const staticRoutes = [
   { path: "/author/anwar-fakhri", changeFrequency: "monthly", priority: 0.7, lastModified: "2026-07-31" },
   { path: "/templates", changeFrequency: "monthly", priority: 0.8, lastModified: "2026-05-27" },
   { path: "/guides", changeFrequency: "weekly", priority: 0.8, lastModified: "2026-11-10" },
-  { path: "/guides/text-to-handwriting", changeFrequency: "monthly", priority: 0.8, lastModified: "2026-11-10" },
   { path: "/contact", changeFrequency: "monthly", priority: 0.6, lastModified: "2026-07-31" },
   { path: "/responsible-use", changeFrequency: "yearly", priority: 0.5, lastModified: "2026-07-31" },
   { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.4, lastModified: "2026-07-31" },
@@ -61,6 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
+  const guidePages = getPublishedGuides().map((guide) => ({
+    url: `${siteUrl}/guides/${guide.slug}`,
+    lastModified: new Date(guide.datePublished ?? "2026-11-10"),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
   const paperGenerators = paperGeneratorSlugs.map((slug) => ({ url: `${siteUrl}/tools/${slug}`, lastModified: new Date("2026-10-25"), changeFrequency: "monthly" as const, priority: 0.85 }));
   const templateDetails = curatedTemplatePages.map((page) => ({ url: `${siteUrl}/templates/${page.family}/${page.slug}`, lastModified: new Date("2026-10-25"), changeFrequency: "monthly" as const, priority: 0.8 }));
 
@@ -73,5 +79,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
   const seen = new Set(cmsContent.map((entry) => entry.url));
-  return [...staticPages.filter((entry) => !seen.has(entry.url)), ...paperGenerators.filter((entry) => !seen.has(entry.url)), ...templateDetails.filter((entry) => !seen.has(entry.url)), ...cmsContent];
+  return [...staticPages.filter((entry) => !seen.has(entry.url)), ...guidePages.filter((entry) => !seen.has(entry.url)), ...paperGenerators.filter((entry) => !seen.has(entry.url)), ...templateDetails.filter((entry) => !seen.has(entry.url)), ...cmsContent];
 }
