@@ -7,6 +7,10 @@ import {
   SignatureGeneratorGuideBody,
   signatureGeneratorFaqs,
 } from "./signature-generator";
+import {
+  WordSearchMakerGuideBody,
+  wordSearchMakerFaqs,
+} from "./word-search-maker";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -25,6 +29,10 @@ export const guideContent: Record<string, GuideContent> = {
   "signature-generator": {
     Body: SignatureGeneratorGuideBody,
     faqs: signatureGeneratorFaqs,
+  },
+  "word-search-maker": {
+    Body: WordSearchMakerGuideBody,
+    faqs: wordSearchMakerFaqs,
   },
 };
 
