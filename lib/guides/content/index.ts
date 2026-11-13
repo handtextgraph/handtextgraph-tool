@@ -11,6 +11,10 @@ import {
   WordSearchMakerGuideBody,
   wordSearchMakerFaqs,
 } from "./word-search-maker";
+import {
+  InvitationMakerGuideBody,
+  invitationMakerFaqs,
+} from "./invitation-maker";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -33,6 +37,10 @@ export const guideContent: Record<string, GuideContent> = {
   "word-search-maker": {
     Body: WordSearchMakerGuideBody,
     faqs: wordSearchMakerFaqs,
+  },
+  "invitation-maker": {
+    Body: InvitationMakerGuideBody,
+    faqs: invitationMakerFaqs,
   },
 };
 

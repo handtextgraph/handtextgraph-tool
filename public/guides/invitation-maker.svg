@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Invitation maker</title>
+  <desc id="desc">A decorated wedding invitation card with a double border and handwritten-style wording</desc>
+  <rect width="800" height="600" fill="#FFFDF7"/>
+  <circle cx="690" cy="90" r="120" fill="#EAF8F5"/>
+  <circle cx="110" cy="510" r="90" fill="#FFF0ED"/>
+  <!-- confetti dots -->
+  <g fill="#F26B5B">
+    <circle cx="150" cy="110" r="7"/>
+    <circle cx="660" cy="500" r="7"/>
+    <circle cx="620" cy="130" r="5"/>
+  </g>
+  <g fill="#218C82">
+    <circle cx="120" cy="180" r="5"/>
+    <circle cx="680" cy="440" r="6"/>
+    <circle cx="180" cy="470" r="6"/>
+  </g>
+  <g fill="#F4C95D">
+    <circle cx="640" cy="200" r="6"/>
+    <circle cx="150" cy="400" r="5"/>
+  </g>
+  <!-- invitation card -->
+  <g transform="rotate(-1 400 300)">
+    <rect x="215" y="70" width="370" height="460" rx="10" fill="#FFFBEA" stroke="#9A6B1F" stroke-width="10"/>
+    <rect x="240" y="95" width="320" height="410" rx="6" fill="none" stroke="#9A6B1F" stroke-opacity="0.35" stroke-width="2"/>
+    <text x="400" y="150" text-anchor="middle" font-family="Georgia, serif" font-size="24" font-weight="600" letter-spacing="4" fill="#9A6B1F">WEDDING</text>
+    <text x="400" y="215" text-anchor="middle" font-family="Georgia, serif" font-size="34" font-weight="bold" fill="#17324D">Ana &amp; Ben</text>
+    <text x="400" y="255" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#334155">Hosted by the Carter Family</text>
+    <text x="400" y="315" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="#17324D">Saturday, June 12</text>
+    <text x="400" y="348" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="#17324D">4:00 PM</text>
+    <text x="400" y="395" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#334155">Riverside Garden</text>
+    <text x="400" y="440" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-style="italic" fill="#334155">Join us for an afternoon of</text>
+    <text x="400" y="466" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-style="italic" fill="#334155">food, games, and company.</text>
+    <text x="400" y="505" text-anchor="middle" font-family="Georgia, serif" font-size="16" font-weight="bold" fill="#9A6B1F">RSVP: 555-0123</text>
+  </g>
+  <!-- coral pencil -->
+  <g transform="rotate(35 640 420)">
+    <rect x="628" y="330" width="24" height="150" rx="10" fill="#F26B5B"/>
+    <path d="M628 480 L640 520 L652 480 Z" fill="#17324D"/>
+    <rect x="628" y="330" width="24" height="26" rx="10" fill="#F4C95D"/>
+  </g>
+</svg>
