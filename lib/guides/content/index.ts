@@ -15,6 +15,10 @@ import {
   InvitationMakerGuideBody,
   invitationMakerFaqs,
 } from "./invitation-maker";
+import {
+  AssignmentMakerGuideBody,
+  assignmentMakerFaqs,
+} from "./assignment-maker";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -41,6 +45,10 @@ export const guideContent: Record<string, GuideContent> = {
   "invitation-maker": {
     Body: InvitationMakerGuideBody,
     faqs: invitationMakerFaqs,
+  },
+  "assignment-maker": {
+    Body: AssignmentMakerGuideBody,
+    faqs: assignmentMakerFaqs,
   },
 };
 
