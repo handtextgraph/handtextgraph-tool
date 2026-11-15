@@ -10,7 +10,7 @@ const siteUrl = siteConfig.origin;
 export const metadata: Metadata = {
   title: "Anwar Fakhri | Founder and Editor of HandTextGraph",
   description:
-    "Meet Anwar Fakhri, the independent maker behind HandTextGraph and its browser-based writing and classroom tools.",
+    "Meet Anwar Fakhri, the independent maker behind HandTextGraph — building free browser-based writing, handwriting and classroom tools, one tool at a time.",
   alternates: { canonical: siteAuthor.profilePath },
   openGraph: {
     title: "Anwar Fakhri | HandTextGraph",
