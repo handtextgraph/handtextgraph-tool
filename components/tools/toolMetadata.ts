@@ -5,7 +5,7 @@ import { publicToolContent } from "@/lib/cms/public";
 import { absoluteUrl, siteConfig } from "@/lib/site-config";
 
 export async function toolMetadata(slug: NewToolSlug): Promise<Metadata> {
-  const tool = newTool(slug), cms=await publicToolContent(slug); const path = `/${slug}`; const title = cms?.seo_title||`${cms?.display_name||tool.name} Free Online | ${siteConfig.name}`;const description=cms?.meta_description||cms?.description||tool.description;
+  const tool = newTool(slug), cms=await publicToolContent(slug); const path = `/${slug}`; const title = cms?.seo_title||("title" in tool?tool.title:undefined)||`${cms?.display_name||tool.name} Free Online | ${siteConfig.name}`;const description=cms?.meta_description||cms?.description||tool.description;
   return { title, description, robots:{index:!cms?.noindex,follow:true},alternates: { canonical: path }, openGraph: { title, description, url: path, type: "website", images: [editorSocialImage] }, twitter: { card: "summary_large_image", title, description, images: [editorSocialImage.url] } };
 }
 

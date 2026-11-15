@@ -13,7 +13,7 @@ export function generateStaticParams() { return paperGeneratorSlugs.map((paperGe
 export async function generateMetadata({ params }: { params: Promise<{ paperGenerator: string }> }): Promise<Metadata> {
   const definition = getPaperGenerator((await params).paperGenerator); if (!definition) return {};
   const path = `/tools/${definition.slug}`;
-  return { title: `${definition.name} — Free Printable PDF, PNG & SVG`, description: definition.description, alternates: { canonical: path }, openGraph: { title: definition.name, description: definition.description, url: absoluteUrl(path), type: "website" } };
+  return { title: definition.title, description: definition.description, alternates: { canonical: path }, openGraph: { title: definition.name, description: definition.description, url: absoluteUrl(path), type: "website" } };
 }
 
 export default async function PaperGeneratorPage({ params }: { params: Promise<{ paperGenerator: string }> }) {

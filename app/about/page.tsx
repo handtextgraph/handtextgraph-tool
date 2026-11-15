@@ -6,14 +6,14 @@ import { defaultSocialImage } from "@/lib/seo";
 export const metadata = {
   title: "About HandTextGraph and Its Free Tools",
   description:
-    "Learn who runs HandTextGraph, why it was built, what its tools do, and how they handle typed text in the browser.",
+    "Learn who runs HandTextGraph, why it was built, and what its free browser tools do — handwriting, printable paper, worksheets and puzzles, made in the browser.",
   alternates: {
     canonical: "/about",
   },
   openGraph: {
     title: "About HandTextGraph and Its Free Tools",
     description:
-      "Learn who runs HandTextGraph, why it was built, what its tools do, and how they handle typed text in the browser.",
+      "Learn who runs HandTextGraph, why it was built, and what its free browser tools do — handwriting, printable paper, worksheets and puzzles, made in the browser.",
     url: "/about",
     type: "website",
     images: [defaultSocialImage],
@@ -22,7 +22,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "About HandTextGraph and Its Free Tools",
     description:
-      "Learn who runs HandTextGraph, why it was built, what its tools do, and how they handle typed text in the browser.",
+      "Learn who runs HandTextGraph, why it was built, and what its free browser tools do — handwriting, printable paper, worksheets and puzzles, made in the browser.",
     images: [defaultSocialImage.url],
   },
 };
