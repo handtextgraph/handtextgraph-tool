@@ -19,6 +19,7 @@ import {
   AssignmentMakerGuideBody,
   assignmentMakerFaqs,
 } from "./assignment-maker";
+import { SudokuGuideBody, sudokuFaqs } from "./sudoku";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -49,6 +50,10 @@ export const guideContent: Record<string, GuideContent> = {
   "assignment-maker": {
     Body: AssignmentMakerGuideBody,
     faqs: assignmentMakerFaqs,
+  },
+  sudoku: {
+    Body: SudokuGuideBody,
+    faqs: sudokuFaqs,
   },
 };
 
