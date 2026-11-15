@@ -130,9 +130,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/sudoku.svg",
     imageAlt: "A Sudoku grid with numbers filled in",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 5,
+    published: true,
+    datePublished: "2026-11-15",
+    readMinutes: 8,
   },
   {
     slug: "handwriting-practice",
