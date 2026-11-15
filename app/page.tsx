@@ -4,7 +4,7 @@ import { HandwritingToolLoader } from "@/components/HandwritingToolLoader";
 import { toolCategories, toolCategoryIntros, toolsInCategory } from "@/lib/tool-catalog";
 
 export const metadata: Metadata = {
-  title: "Text to Handwriting Converter Free Online",
+  title: "Text to Handwriting Converter Free Online | HandTextGraph",
   description: "Text to handwriting converter free online — turn typed text into realistic handwritten pages, then create printable paper, worksheets, puzzles, drawings, and posters with free browser tools.",
   alternates: { canonical: "/" },
 };
