@@ -20,6 +20,10 @@ import {
   assignmentMakerFaqs,
 } from "./assignment-maker";
 import { SudokuGuideBody, sudokuFaqs } from "./sudoku";
+import {
+  HandwritingPracticeGuideBody,
+  handwritingPracticeFaqs,
+} from "./handwriting-practice";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -54,6 +58,10 @@ export const guideContent: Record<string, GuideContent> = {
   sudoku: {
     Body: SudokuGuideBody,
     faqs: sudokuFaqs,
+  },
+  "handwriting-practice": {
+    Body: HandwritingPracticeGuideBody,
+    faqs: handwritingPracticeFaqs,
   },
 };
 
