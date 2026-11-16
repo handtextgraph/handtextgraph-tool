@@ -349,6 +349,7 @@ export default async function HandwritingWorksheetGeneratorPage() {
           <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
             <h3 className="text-lg font-semibold text-slate-950">Privacy</h3>
             <p className="mt-2 leading-7 text-slate-600">{tool.privacy}</p>
+            <Link href={tool.guideHref} className="mt-4 inline-flex font-semibold text-brand-blue hover:underline">{tool.guideLabel} →</Link>
           </div>
         </div>
       </section>

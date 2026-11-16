@@ -193,6 +193,7 @@ export function ToolExperiencePage({ profile }: { profile: FunctionalToolProfile
           <div className="mt-5 flex flex-wrap gap-3">
             <TrackedLink href="/tools" eventName="related_tool_clicked" eventTarget="tools-hub" className="rounded-full border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-100">Browse all tools</TrackedLink>
             <Link href="/" className="rounded-full border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-100">{tool.homeLinkLabel}</Link>
+            <Link href={tool.guideHref} className="rounded-full border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-100">{tool.guideLabel}</Link>
             {(profile === "lined" || profile === "graph") && (
               <Link href="/templates" className="rounded-full border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-100">
                 Print blank paper templates
