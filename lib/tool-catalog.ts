@@ -70,3 +70,19 @@ export const toolCategories = ["Handwriting", "Printable paper", "Practice and c
 export function toolsInCategory(category: ToolCategory) {
   return publicToolCatalog.filter((tool) => tool.category === category);
 }
+
+// Homepage curation: the Handwriting cards are chosen by value, not catalog
+// position, so /tools/word-to-handwriting (keyword-map primary "word to
+// handwriting") appears instead of /tools/graph-paper-handwriting — the most
+// niche of the five, and graph paper stays on the homepage via the Printable
+// paper card "Square graph paper". Every other category keeps the first five.
+export const homepageCategoryOrder: Partial<Record<ToolCategory, readonly string[]>> = {
+  Handwriting: ["/#tool", "/tools/lined-paper-handwriting", "/tools/handwritten-notes", "/tools/text-to-handwriting-pdf", "/tools/word-to-handwriting"],
+};
+
+export function homepageTools(category: ToolCategory): PublicToolCatalogItem[] {
+  const order = homepageCategoryOrder[category];
+  if (!order) return toolsInCategory(category).slice(0, 5);
+  const byHref = new Map<string, PublicToolCatalogItem>(publicToolCatalog.map((tool): [string, PublicToolCatalogItem] => [tool.href, tool]));
+  return order.map((href) => byHref.get(href)).filter((tool): tool is PublicToolCatalogItem => Boolean(tool));
+}

@@ -29,3 +29,39 @@ export const curatedTemplatePages=[
   {family:"graph-paper",slug:"a4-5mm",presetId:"graph-paper-5-mm-a4-portrait",title:"Printable A4 5mm Graph Paper PDF",description:"Download A4 5 mm graph paper as a true-to-size vector PDF — 38 × 55 squares per sheet for maths and sketching, with print instructions and related paper tools."},{family:"graph-paper",slug:"a4-1cm",presetId:"graph-paper-1-cm-a4-portrait",title:"Printable A4 1cm Graph Paper PDF",description:"Download A4 1 cm graph paper as an accurate vector PDF — large 1 cm squares for charts and maths, true to size at 100%, with print instructions."},{family:"graph-paper",slug:"letter-quarter-inch",presetId:"graph-paper-quarter-inch-letter-portrait",title:"Letter Quarter-Inch Graph Paper PDF",description:"Download US Letter quarter-inch graph paper as a true-to-size vector PDF — quarter-inch squares for sketches and plans, with print instructions."},{family:"dot-grid",slug:"a4-5mm",presetId:"dot-grid-standard-5-mm-a4-portrait",title:"A4 5mm Dot Grid Paper PDF",description:"Download A4 5 mm dot grid paper as an accurate vector PDF — a subtle dot lattice for planning, lettering and sketching, true to size at 100%."},{family:"lined-paper",slug:"college-ruled",presetId:"lined-paper-college-ruled-letter-portrait",title:"Printable College Ruled Paper PDF",description:"Download US Letter college ruled paper as an accurate vector PDF — narrow ruling for neat notes, true to size at 100%, with print instructions."},{family:"lined-paper",slug:"wide-ruled",presetId:"lined-paper-wide-ruled-letter-portrait",title:"Printable Wide Ruled Paper PDF",description:"Download US Letter wide ruled paper as an accurate vector PDF — wide ruling for larger handwriting, true to size at 100%, with print instructions."},{family:"coordinate-plane",slug:"a4",presetId:"coordinate-plane-standard-a4-portrait",title:"Printable A4 Coordinate Plane",description:"Download A4 coordinate plane paper as an accurate vector PDF — centred Cartesian axes with major intervals and labels, true to size at 100%."},{family:"isometric-paper",slug:"a4",presetId:"isometric-paper-standard-a4-portrait",title:"A4 Isometric Graph Paper PDF",description:"Download A4 isometric paper as an accurate vector PDF — 30-degree grids for three-dimensional sketches, true to size at 100%, with print tips."},{family:"cornell-notes",slug:"a4",presetId:"cornell-notes-standard-a4-portrait",title:"Printable A4 Cornell Notes Template",description:"Download an A4 Cornell notes template as an accurate vector PDF — true cue, notes, header and summary regions for study notes, ready to print at 100%."},{family:"handwriting-practice",slug:"primary",presetId:"handwriting-practice-primary-18-mm-a4-portrait",title:"Primary Handwriting Practice Paper",description:"Download A4 primary handwriting practice paper as an accurate vector PDF — 18 mm three-line rows with a dashed midline, true to size at 100%."},
 ] as const;
 export function getCuratedPage(family:string,slug:string){return curatedTemplatePages.find(page=>page.family===family&&page.slug===slug)}
+
+// Detail-page URL for a library preset, or null when the preset has no curated
+// detail page (only the 10 curated leaves do). Used by the /templates hub
+// cards so every curated leaf gains an inbound link from the hub.
+export function templateDetailHref(template:LibraryTemplate){const page=curatedTemplatePages.find(item=>item.presetId===template.id);return page?`/templates/${page.family}/${page.slug}`:null}
+
+// Closest-family order used to fill a template detail page's "Related printable
+// templates" block. Same-family siblings come first; the fill then takes the
+// nearest other families. The fill list is rotated by the page's index among
+// its family siblings, so leaves in a multi-leaf family name different
+// neighbours — otherwise the single-leaf grid families (dot-grid,
+// coordinate-plane, isometric-paper) would each stay at one inbound link.
+const relatedFamilyOrder:Record<string,readonly string[]>={
+  "graph-paper":["dot-grid","coordinate-plane","isometric-paper","lined-paper","cornell-notes","handwriting-practice"],
+  "dot-grid":["graph-paper","coordinate-plane","isometric-paper","lined-paper","cornell-notes","handwriting-practice"],
+  "coordinate-plane":["graph-paper","dot-grid","isometric-paper","lined-paper","cornell-notes","handwriting-practice"],
+  "isometric-paper":["graph-paper","dot-grid","coordinate-plane","lined-paper","cornell-notes","handwriting-practice"],
+  "lined-paper":["handwriting-practice","cornell-notes","graph-paper","dot-grid","coordinate-plane","isometric-paper"],
+  "cornell-notes":["lined-paper","handwriting-practice","graph-paper","dot-grid","coordinate-plane","isometric-paper"],
+  "handwriting-practice":["lined-paper","cornell-notes","graph-paper","dot-grid","coordinate-plane","isometric-paper"],
+};
+
+// The 3 related detail pages for a curated leaf: same-family siblings first,
+// then the nearest other families in closest-first order. Every target is an
+// existing curated detail page — no invented leaves.
+export function relatedCuratedPages(family:string,slug:string){
+  const siblings=curatedTemplatePages.filter(page=>page.family===family&&page.slug!==slug);
+  const familyPages=curatedTemplatePages.filter(page=>page.family===family);
+  const selfIndex=Math.max(0,familyPages.findIndex(page=>page.slug===slug));
+  const rank=relatedFamilyOrder[family]??[];
+  const candidates:(typeof curatedTemplatePages)[number][]=[];
+  for(const otherFamily of rank)candidates.push(...curatedTemplatePages.filter(page=>page.family===otherFamily));
+  for(const page of curatedTemplatePages)if(page.family!==family&&!candidates.includes(page))candidates.push(page);
+  const rotated=[...candidates.slice(selfIndex),...candidates.slice(0,selfIndex)];
+  return [...siblings,...rotated].slice(0,3);
+}
