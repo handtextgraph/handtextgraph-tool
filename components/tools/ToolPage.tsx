@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { newTools, type NewToolSlug } from "@/lib/new-tools";
+import { getPublishedGuides } from "@/lib/guides";
 import { toolSchema } from "./toolMetadata";
 import { publicToolContent } from "@/lib/cms/public";
 import { Breadcrumbs, ContentPanel, PublicContainer } from "@/components/ui/PublicUi";
@@ -17,6 +18,9 @@ export async function ToolPage({ slug, children }: { slug: NewToolSlug; children
   const sameCategory = newTools.filter((item) => item.category === tool.category);
   const selfIndex = sameCategory.findIndex((item) => item.slug === slug);
   const related = [...sameCategory.slice(selfIndex + 1), ...sameCategory.slice(0, selfIndex)].slice(0, 3);
+  // A published guide that teaches this exact tool links from the related-tools
+  // block, so the guide gets link support from the tool it teaches.
+  const guide = getPublishedGuides().find((item) => item.toolHref === `/${slug}`);
   const supporting = stage5Content[slug];
   // The FAQ block below only renders when there is no CMS content_html, so
   // the FAQPage schema must use exactly the same list the page shows.
@@ -53,7 +57,7 @@ export async function ToolPage({ slug, children }: { slug: NewToolSlug; children
     {!cms?.content_html&&<section className="mx-auto grid max-w-6xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-2 lg:px-8">
       <ContentPanel><h2 className="text-2xl font-semibold text-slate-950">How to use this tool</h2><ol className="mt-4 list-decimal space-y-3 pl-5 leading-7 text-slate-600">{(cms?.instructions?.length?cms.instructions:supporting?.instructions||["Enter or upload your source content in the settings panel.","Adjust the available options and review the live output.","Regenerate when needed, then download, copy, or print the verified result."]).map(step=><li key={step}>{step}</li>)}</ol></ContentPanel>
       <ContentPanel><h2 className="text-2xl font-semibold text-slate-950">Practical uses</h2>{cms?.features?.length||supporting?.uses?<ul className="mt-4 list-disc space-y-2 pl-5 leading-7 text-slate-600">{(cms?.features?.length?cms.features:supporting!.uses).map(feature=><li key={feature}>{feature}</li>)}</ul>:<p className="mt-4 leading-7 text-slate-600">Use it for classroom activities, home learning, printable projects, and quick drafts.</p>}<h3 className="mt-5 text-lg font-semibold text-slate-950">Limitations and privacy</h3><p className="mt-2 leading-7 text-slate-600">{supporting?.limitations||"Preview every result before sharing. Processing happens in this browser and the tool does not require a paid API."}</p></ContentPanel>
-      <article className="rounded-[32px] border border-blue-100 bg-blue-50 p-7 lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Related tools</h2><div className="mt-4 flex flex-wrap gap-3">{related.map((item) => <Link key={item.slug} href={`/${item.slug}`} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-blue shadow-sm hover:bg-blue-100">{item.name}</Link>)}<Link href="/tools" className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white">View all tools</Link></div></article>
+      <article className="rounded-[32px] border border-blue-100 bg-blue-50 p-7 lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Related tools</h2><div className="mt-4 flex flex-wrap gap-3">{related.map((item) => <Link key={item.slug} href={`/${item.slug}`} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-blue shadow-sm hover:bg-blue-100">{item.name}</Link>)}<Link href="/tools" className="rounded-full bg-brand-blue px-4 py-2 text-sm font-semibold text-white">View all tools</Link>{guide&&<Link href={`/guides/${guide.slug}`} className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-blue shadow-sm hover:bg-blue-100">How to use this tool — step-by-step guide</Link>}</div></article>
       <article className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-card lg:col-span-2"><h2 className="text-2xl font-semibold text-slate-950">Frequently asked questions</h2><div className="mt-5 grid gap-5 md:grid-cols-3">{faqPairs.map(([question,answer])=><div key={question}><h3 className="font-semibold">{question}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{answer}</p></div>)}</div></article>
     </section>}
     {!cms?.content_html&&supporting?.guide&&<section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
