@@ -160,9 +160,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/cornell-notes.svg",
     imageAlt: "A Cornell notes page with cue column, notes area, and summary box",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 5,
+    published: true,
+    datePublished: "2026-11-17",
+    readMinutes: 9,
   },
   {
     slug: "graph-paper",
