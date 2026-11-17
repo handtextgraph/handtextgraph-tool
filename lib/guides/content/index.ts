@@ -24,6 +24,10 @@ import {
   HandwritingPracticeGuideBody,
   handwritingPracticeFaqs,
 } from "./handwriting-practice";
+import {
+  CornellNotesGuideBody,
+  cornellNotesFaqs,
+} from "./cornell-notes";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -62,6 +66,10 @@ export const guideContent: Record<string, GuideContent> = {
   "handwriting-practice": {
     Body: HandwritingPracticeGuideBody,
     faqs: handwritingPracticeFaqs,
+  },
+  "cornell-notes": {
+    Body: CornellNotesGuideBody,
+    faqs: cornellNotesFaqs,
   },
 };
 
