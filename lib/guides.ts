@@ -175,9 +175,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/graph-paper.svg",
     imageAlt: "A sheet of graph paper with a square grid",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 4,
+    published: true,
+    datePublished: "2026-11-18",
+    readMinutes: 9,
   },
   {
     slug: "lined-paper",
