@@ -28,6 +28,10 @@ import {
   CornellNotesGuideBody,
   cornellNotesFaqs,
 } from "./cornell-notes";
+import {
+  GraphPaperGuideBody,
+  graphPaperFaqs,
+} from "./graph-paper";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -70,6 +74,10 @@ export const guideContent: Record<string, GuideContent> = {
   "cornell-notes": {
     Body: CornellNotesGuideBody,
     faqs: cornellNotesFaqs,
+  },
+  "graph-paper": {
+    Body: GraphPaperGuideBody,
+    faqs: graphPaperFaqs,
   },
 };
 
