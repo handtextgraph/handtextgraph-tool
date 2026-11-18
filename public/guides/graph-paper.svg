@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Graph paper</title>
+  <desc id="desc">A sheet of graph paper with a square grid, a bar chart, and a plotted straight line</desc>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#8fb3da" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="#FFFDF7"/>
+  <circle cx="690" cy="90" r="120" fill="#EAF8F5"/>
+  <circle cx="110" cy="510" r="90" fill="#FFF0ED"/>
+  <!-- paper sheet -->
+  <g transform="rotate(-1 400 300)">
+    <rect x="170" y="60" width="460" height="480" rx="10" fill="#FFFFFF" stroke="#D9D5CC" stroke-width="2"/>
+    <!-- square grid -->
+    <rect x="195" y="85" width="410" height="430" fill="url(#grid)"/>
+    <!-- bar chart drawn on the grid -->
+    <g>
+      <rect x="230" y="360" width="40" height="110" fill="#218C82"/>
+      <rect x="300" y="390" width="40" height="80" fill="#F26B5B"/>
+      <rect x="370" y="330" width="40" height="140" fill="#385f8d"/>
+      <rect x="440" y="415" width="40" height="55" fill="#F4C95D"/>
+      <line x1="210" y1="470" x2="520" y2="470" stroke="#17324D" stroke-width="3"/>
+    </g>
+    <!-- plotted straight line -->
+    <g>
+      <line x1="220" y1="300" x2="580" y2="140" stroke="#F26B5B" stroke-width="3"/>
+      <circle cx="300" cy="264" r="6" fill="#F26B5B"/>
+      <circle cx="460" cy="193" r="6" fill="#F26B5B"/>
+      <text x="470" y="165" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#17324D">y = 2x + 1</text>
+    </g>
+    <!-- handwritten note -->
+    <text x="205" y="510" font-family="Georgia, serif" font-size="20" font-style="italic" fill="#17324D">One square = one unit</text>
+  </g>
+  <!-- coral pencil -->
+  <g transform="rotate(35 640 420)">
+    <rect x="628" y="330" width="24" height="150" rx="10" fill="#F26B5B"/>
+    <path d="M628 480 L640 520 L652 480 Z" fill="#17324D"/>
+    <rect x="628" y="330" width="24" height="26" rx="10" fill="#F4C95D"/>
+  </g>
+</svg>
