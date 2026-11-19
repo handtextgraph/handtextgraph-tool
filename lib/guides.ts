@@ -190,9 +190,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/lined-paper.svg",
     imageAlt: "A sheet of lined paper with evenly spaced rules",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 4,
+    published: true,
+    datePublished: "2026-11-19",
+    readMinutes: 9,
   },
   {
     slug: "handwriting-to-text-reverse",
