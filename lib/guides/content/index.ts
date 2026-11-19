@@ -32,6 +32,10 @@ import {
   GraphPaperGuideBody,
   graphPaperFaqs,
 } from "./graph-paper";
+import {
+  LinedPaperGuideBody,
+  linedPaperFaqs,
+} from "./lined-paper";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -78,6 +82,10 @@ export const guideContent: Record<string, GuideContent> = {
   "graph-paper": {
     Body: GraphPaperGuideBody,
     faqs: graphPaperFaqs,
+  },
+  "lined-paper": {
+    Body: LinedPaperGuideBody,
+    faqs: linedPaperFaqs,
   },
 };
 
