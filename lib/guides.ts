@@ -205,9 +205,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/handwriting-to-text-reverse.svg",
     imageAlt: "A handwritten page beside its typed-text version",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 5,
+    published: true,
+    datePublished: "2026-11-20",
+    readMinutes: 9,
   },
   {
     slug: "semi-log-log-log-paper",

@@ -36,6 +36,10 @@ import {
   LinedPaperGuideBody,
   linedPaperFaqs,
 } from "./lined-paper";
+import {
+  HandwritingToTextReverseGuideBody,
+  handwritingToTextReverseFaqs,
+} from "./handwriting-to-text-reverse";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -86,6 +90,10 @@ export const guideContent: Record<string, GuideContent> = {
   "lined-paper": {
     Body: LinedPaperGuideBody,
     faqs: linedPaperFaqs,
+  },
+  "handwriting-to-text-reverse": {
+    Body: HandwritingToTextReverseGuideBody,
+    faqs: handwritingToTextReverseFaqs,
   },
 };
 
