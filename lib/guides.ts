@@ -220,9 +220,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/semi-log-log-log-paper.svg",
     imageAlt: "A sheet of semi-log graph paper with a logarithmic scale",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 5,
+    published: true,
+    datePublished: "2026-11-21",
+    readMinutes: 9,
   },
   {
     slug: "isometric-paper",
