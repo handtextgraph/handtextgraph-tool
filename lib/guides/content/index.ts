@@ -40,6 +40,10 @@ import {
   HandwritingToTextReverseGuideBody,
   handwritingToTextReverseFaqs,
 } from "./handwriting-to-text-reverse";
+import {
+  SemiLogLogLogPaperGuideBody,
+  semiLogLogLogPaperFaqs,
+} from "./semi-log-log-log-paper";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -94,6 +98,10 @@ export const guideContent: Record<string, GuideContent> = {
   "handwriting-to-text-reverse": {
     Body: HandwritingToTextReverseGuideBody,
     faqs: handwritingToTextReverseFaqs,
+  },
+  "semi-log-log-log-paper": {
+    Body: SemiLogLogLogPaperGuideBody,
+    faqs: semiLogLogLogPaperFaqs,
   },
 };
 
