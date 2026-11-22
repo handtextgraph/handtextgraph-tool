@@ -44,6 +44,10 @@ import {
   SemiLogLogLogPaperGuideBody,
   semiLogLogLogPaperFaqs,
 } from "./semi-log-log-log-paper";
+import {
+  IsometricPaperGuideBody,
+  isometricPaperFaqs,
+} from "./isometric-paper";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -102,6 +106,10 @@ export const guideContent: Record<string, GuideContent> = {
   "semi-log-log-log-paper": {
     Body: SemiLogLogLogPaperGuideBody,
     faqs: semiLogLogLogPaperFaqs,
+  },
+  "isometric-paper": {
+    Body: IsometricPaperGuideBody,
+    faqs: isometricPaperFaqs,
   },
 };
 
