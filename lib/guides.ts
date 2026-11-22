@@ -235,9 +235,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/isometric-paper.svg",
     imageAlt: "A sheet of isometric graph paper with a triangle grid",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 4,
+    published: true,
+    datePublished: "2026-11-22",
+    readMinutes: 9,
   },
   {
     slug: "handwritten-notes",
