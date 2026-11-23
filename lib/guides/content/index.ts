@@ -48,6 +48,10 @@ import {
   IsometricPaperGuideBody,
   isometricPaperFaqs,
 } from "./isometric-paper";
+import {
+  HandwrittenNotesGuideBody,
+  handwrittenNotesFaqs,
+} from "./handwritten-notes";
 
 export type GuideContent = {
   Body: ComponentType;
@@ -110,6 +114,10 @@ export const guideContent: Record<string, GuideContent> = {
   "isometric-paper": {
     Body: IsometricPaperGuideBody,
     faqs: isometricPaperFaqs,
+  },
+  "handwritten-notes": {
+    Body: HandwrittenNotesGuideBody,
+    faqs: handwrittenNotesFaqs,
   },
 };
 
