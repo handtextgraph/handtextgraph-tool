@@ -250,9 +250,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/handwritten-notes.svg",
     imageAlt: "Handwritten study notes on lined paper",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 5,
+    published: true,
+    datePublished: "2026-11-23",
+    readMinutes: 9,
   },
   {
     slug: "engineering-paper",
