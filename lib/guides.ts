@@ -265,9 +265,9 @@ export const guides: readonly Guide[] = [
     image: "/guides/engineering-paper.svg",
     imageAlt: "A sheet of engineering paper with a fine grid",
     relatedTools: [],
-    published: false,
-    datePublished: null,
-    readMinutes: 4,
+    published: true,
+    datePublished: "2026-11-24",
+    readMinutes: 10,
   },
 ];
 
