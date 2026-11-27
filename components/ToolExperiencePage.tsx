@@ -84,7 +84,7 @@ export function ToolExperiencePage({ profile }: { profile: FunctionalToolProfile
       inLanguage: "en",
       isPartOf: { "@id": `${siteUrl}/#website` },
       mainEntity: { "@id": `${siteUrl}${tool.path}#application` },
-      dateModified: "2026-08-01",
+      dateModified: tool.dateModified,
     },
     {
       "@context": "https://schema.org",
