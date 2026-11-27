@@ -8,13 +8,13 @@ import { siteConfig } from "@/lib/site-config";
 const siteUrl = siteConfig.origin;
 
 const staticRoutes = [
-  { path: "", changeFrequency: "weekly", priority: 1, lastModified: "2026-08-01" },
+  { path: "", changeFrequency: "weekly", priority: 1, lastModified: "2026-11-28" },
   { path: "/tools", changeFrequency: "weekly", priority: 0.9, lastModified: "2026-07-18" },
   { path: "/tools/lined-paper-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
   { path: "/tools/graph-paper-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
   { path: "/tools/handwritten-notes", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
   { path: "/tools/text-to-handwriting-pdf", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
-  { path: "/tools/word-to-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-25" },
+  { path: "/tools/word-to-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
   { path: "/tools/handwriting-worksheet-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-09-28" },
   { path: "/cursive-text-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
   { path: "/sentence-scramble-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },

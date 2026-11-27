@@ -95,7 +95,7 @@ const siteSchema = [
 ];
 
 const footerGroups = [
- { heading: "Handwriting Tools", links: [{href:"/#tool",label:"Text to Handwriting"},{href:"/cursive-text-generator",label:"Cursive Text Generator"},{href:"/signature-generator",label:"Signature Generator"}]},
+ { heading: "Handwriting Tools", links: [{href:"/#tool",label:"Text to Handwriting"},{href:"/tools/text-to-handwriting-pdf",label:"PDF to Handwriting"},{href:"/tools/word-to-handwriting",label:"Word to Handwriting"},{href:"/cursive-text-generator",label:"Cursive Text Generator"},{href:"/signature-generator",label:"Signature Generator"}]},
  { heading: "Educational Tools", links: [{href:"/tools/handwriting-worksheet-generator",label:"Worksheet Generator"},{href:"/sentence-scramble-generator",label:"Sentence Scramble"},{href:"/word-search-maker",label:"Word Search Maker"},{href:"/word-scramble-generator",label:"Word Scramble"},{href:"/assignment-maker",label:"Assignment Maker"}]},
  { heading: "Creative Tools", links: [{href:"/virtual-graph-paper",label:"Virtual Graph Paper"},{href:"/pixel-art-generator",label:"Pixel Art Generator"},{href:"/invitation-maker",label:"Invitation Maker"},{href:"/block-poster-maker",label:"Block Poster Maker"}]},
 ];

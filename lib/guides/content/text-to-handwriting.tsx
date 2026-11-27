@@ -142,7 +142,16 @@ export function TextToHandwritingGuideBody() {
             text to handwriting PDF
           </Link>{" "}
           tool is the same converter set up for multi-page documents and
-          PDF export.
+          PDF export. If the assignment already exists as a Word file,
+          the{" "}
+          <Link
+            href="/tools/word-to-handwriting"
+            className="font-bold text-brand-teal hover:underline"
+          >
+            word to handwriting converter
+          </Link>{" "}
+          reads the .docx directly, so you can start from the document
+          you already have.
         </li>
         <li>
           <strong>Journal pages</strong> — keep a daily note or diary
