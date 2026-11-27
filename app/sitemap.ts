@@ -9,20 +9,20 @@ const siteUrl = siteConfig.origin;
 
 const staticRoutes = [
   { path: "", changeFrequency: "weekly", priority: 1, lastModified: "2026-11-28" },
-  { path: "/tools", changeFrequency: "weekly", priority: 0.9, lastModified: "2026-07-18" },
+  { path: "/tools", changeFrequency: "weekly", priority: 0.9, lastModified: "2026-11-28" },
   { path: "/tools/lined-paper-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
-  { path: "/tools/graph-paper-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
-  { path: "/tools/handwritten-notes", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
-  { path: "/tools/text-to-handwriting-pdf", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-08-01" },
+  { path: "/tools/graph-paper-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
+  { path: "/tools/handwritten-notes", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
+  { path: "/tools/text-to-handwriting-pdf", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-16" },
   { path: "/tools/word-to-handwriting", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
-  { path: "/tools/handwriting-worksheet-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-09-28" },
-  { path: "/cursive-text-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
-  { path: "/sentence-scramble-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
-  { path: "/word-search-maker", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
-  { path: "/signature-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
-  { path: "/word-scramble-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
-  { path: "/assignment-maker", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
-  { path: "/invitation-maker", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-17" },
+  { path: "/tools/handwriting-worksheet-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
+  { path: "/cursive-text-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
+  { path: "/sentence-scramble-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
+  { path: "/word-search-maker", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
+  { path: "/signature-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
+  { path: "/word-scramble-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-14" },
+  { path: "/assignment-maker", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
+  { path: "/invitation-maker", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
   { path: "/number-grid-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-25" },
   { path: "/printable-number-charts", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
   { path: "/blank-number-chart", changeFrequency: "monthly", priority: 0.8, lastModified: "2026-11-10" },
@@ -36,17 +36,17 @@ const staticRoutes = [
   { path: "/multi-page-image-poster-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-10-25" },
   { path: "/calligraphy-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
   { path: "/fancy-text-generator", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-28" },
-  { path: "/handwriting-font", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
+  { path: "/handwriting-font", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-13" },
   { path: "/printable-worksheets", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
   { path: "/handwriting-to-text", changeFrequency: "monthly", priority: 0.9, lastModified: "2026-11-10" },
-  { path: "/about", changeFrequency: "monthly", priority: 0.6, lastModified: "2026-07-31" },
-  { path: "/author/anwar-fakhri", changeFrequency: "monthly", priority: 0.7, lastModified: "2026-07-31" },
-  { path: "/templates", changeFrequency: "monthly", priority: 0.8, lastModified: "2026-05-27" },
-  { path: "/guides", changeFrequency: "weekly", priority: 0.8, lastModified: "2026-11-10" },
-  { path: "/contact", changeFrequency: "monthly", priority: 0.6, lastModified: "2026-07-31" },
-  { path: "/responsible-use", changeFrequency: "yearly", priority: 0.5, lastModified: "2026-07-31" },
-  { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.4, lastModified: "2026-07-31" },
-  { path: "/terms", changeFrequency: "yearly", priority: 0.4, lastModified: "2026-07-31" },
+  { path: "/about", changeFrequency: "monthly", priority: 0.6, lastModified: "2026-11-15" },
+  { path: "/author/anwar-fakhri", changeFrequency: "monthly", priority: 0.7, lastModified: "2026-11-15" },
+  { path: "/templates", changeFrequency: "monthly", priority: 0.8, lastModified: "2026-11-28" },
+  { path: "/guides", changeFrequency: "weekly", priority: 0.8, lastModified: "2026-11-24" },
+  { path: "/contact", changeFrequency: "monthly", priority: 0.6, lastModified: "2026-10-25" },
+  { path: "/responsible-use", changeFrequency: "yearly", priority: 0.5, lastModified: "2026-10-25" },
+  { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.4, lastModified: "2026-10-25" },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.4, lastModified: "2026-10-25" },
 ] satisfies Array<{
   path: string;
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
@@ -63,12 +63,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
   const guidePages = getPublishedGuides().map((guide) => ({
     url: `${siteUrl}/guides/${guide.slug}`,
-    lastModified: new Date(guide.datePublished ?? "2026-11-10"),
+    lastModified: new Date(guide.dateModified ?? guide.datePublished ?? "2026-11-10"),
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
-  const paperGenerators = paperGeneratorSlugs.map((slug) => ({ url: `${siteUrl}/tools/${slug}`, lastModified: new Date("2026-10-25"), changeFrequency: "monthly" as const, priority: 0.85 }));
-  const templateDetails = curatedTemplatePages.map((page) => ({ url: `${siteUrl}/templates/${page.family}/${page.slug}`, lastModified: new Date("2026-10-25"), changeFrequency: "monthly" as const, priority: 0.8 }));
+  const paperGenerators = paperGeneratorSlugs.map((slug) => ({ url: `${siteUrl}/tools/${slug}`, lastModified: new Date("2026-11-16"), changeFrequency: "monthly" as const, priority: 0.85 }));
+  const templateDetails = curatedTemplatePages.map((page) => ({ url: `${siteUrl}/templates/${page.family}/${page.slug}`, lastModified: new Date("2026-11-28"), changeFrequency: "monthly" as const, priority: 0.8 }));
 
   const cmsContent = [...await publicContentList("PAGE")]
     .filter((entry) => entry.include_in_sitemap && !entry.robots_noindex)
