@@ -27,6 +27,8 @@ export type Guide = {
   published: boolean;
   /** ISO date (YYYY-MM-DD) once published; null while a draft. */
   datePublished: string | null;
+  /** ISO date of the last content change; sitemap + schema prefer this over datePublished. */
+  dateModified?: string;
   readMinutes: number;
 };
 
@@ -49,6 +51,7 @@ export const guides: readonly Guide[] = [
     ],
     published: true,
     datePublished: "2026-11-10",
+    dateModified: "2026-11-28",
     readMinutes: 6,
   },
   {

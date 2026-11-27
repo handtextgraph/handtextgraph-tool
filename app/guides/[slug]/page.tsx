@@ -78,7 +78,7 @@ export default async function GuidePage({ params }: Props) {
       url: absoluteUrl(),
     },
     datePublished: guide.datePublished ?? undefined,
-    dateModified: guide.datePublished ?? undefined,
+    dateModified: guide.dateModified ?? guide.datePublished ?? undefined,
     mainEntityOfPage: guideUrl,
   };
   const breadcrumbSchema = {

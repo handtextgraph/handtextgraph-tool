@@ -14,6 +14,7 @@ type ToolFaq = { question: string; answer: string };
 export type ToolPageConfig = {
   profile: FunctionalToolProfile | WorksheetToolProfile;
   path: string;
+  dateModified: string;
   name: string;
   title: string;
   description: string;
@@ -42,7 +43,7 @@ export type ToolPageConfig = {
 
 export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfile, ToolPageConfig> = {
   word: {
-    profile: "word", path: "/tools/word-to-handwriting", name: "Word to Handwriting Converter",
+    profile: "word", path: "/tools/word-to-handwriting", dateModified: "2026-11-28", name: "Word to Handwriting Converter",
     title: "Word to Handwriting Converter — DOCX to PDF, PNG or JPG | HandTextGraph",
     description: "Word to handwriting converter: extract editable text from a DOCX in your browser, convert it to handwriting, and export multipage PDF, PNG, or JPG files.",
     eyebrow: "Browser-local DOCX converter", h1: "Convert Word DOCX text to handwriting",
@@ -72,6 +73,7 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
   lined: {
     profile: "lined",
     path: "/tools/lined-paper-handwriting",
+    dateModified: "2026-11-28",
     name: "Lined Paper Handwriting Generator",
     title: "Lined Paper Handwriting Generator | HandTextGraph",
     description: "Create handwriting on lined A4 or Letter paper, adjust notebook spacing and margins, preview every page, and export PDF, PNG, or JPG.",
@@ -125,6 +127,7 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
   graph: {
     profile: "graph",
     path: "/tools/graph-paper-handwriting",
+    dateModified: "2026-11-28",
     name: "Graph Paper Handwriting Generator",
     title: "Graph Paper Handwriting Generator | HandTextGraph",
     description: "Create handwritten-style text on printable graph paper for lab records and structured notes, with live preview and PDF, PNG, or JPG export.",
@@ -157,6 +160,9 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
       { question: "Can I make printable graph-paper handwriting pages?", answer: "Yes. Select the matching paper size, preview the grid and text, then export a PDF for printing." },
       { question: "Does the tool solve math or render LaTeX?", answer: "No. It renders plain text on a grid and does not provide mathematical intelligence or LaTeX typesetting." },
       { question: "Can I download graph-paper pages as images?", answer: "Yes. PNG and JPG are available alongside PDF export." },
+      { question: "What settings does the graph-paper preset start with?", answer: "The Lab Record style, black ink, A4 paper, size 30, line spacing 1.5, and low variation (0.28), with the margin line off. That combination keeps labels readable against the grid; change one control at a time from there and re-preview." },
+      { question: "Can I use the graph-paper page for tables or planners?", answer: "For simple ones, yes. Short lines with a blank line between blocks read as rough columns on the grid, which suits checklists, habit trackers, and vocabulary sets. There is no real table formatting — the tool renders plain text, so alignment is approximate and wide tables will not line up exactly. Keep entries short and consistent and the page stays organized." },
+      { question: "Why does my text drift off the grid lines?", answer: "The text and the grid are set independently, so a large font with tight line spacing drifts across the squares. Start from the defaults — size 30 with 1.5 line spacing — and open the line spacing before shrinking the font. Small text on a dense grid is the usual cause of a messy page; more whitespace between lines fixes it more reliably than smaller letters." },
     ],
     deepDive: {
       heading: "Graph Paper Deep Dive: Structured Notes, Lab Records, and Organized Study Pages",
@@ -175,6 +181,7 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
   notes: {
     profile: "notes",
     path: "/tools/handwritten-notes",
+    dateModified: "2026-11-28",
     name: "Handwritten Notes Generator",
     title: "Handwritten Notes Generator for Study | HandTextGraph",
     description: "Handwritten notes generator: turn typed class, revision, or simple notes into readable handwritten-style pages with optional note details, presets, live preview, and PDF export.",
@@ -208,6 +215,8 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
       { question: "Can I add a title, subject, and date?", answer: "Yes. The optional note-detail fields insert a simple plain-text header while leaving the main editor available." },
       { question: "Can I upload a Word file or PDF?", answer: "Document upload is handled by the separate Word DOCX workflow and PDF to handwriting converter. After extraction, review the text before formatting it as notes." },
       { question: "Can I print my handwritten notes?", answer: "Yes. Export a PDF and print one test page first — PDF is the practical export for multi-page revision sets." },
+      { question: "Which preset should I choose — Class Notes, Revision Notes, or Simple Notes?", answer: "Class Notes suits same-day rewrites: lined A4, blue ink, Clean Notes style, size 32, spacing 1.45. Revision Notes suits condensed exam material: lined A4, black ink, size 31, spacing 1.55, and lower variation, so dense pages stay legible. Simple Notes suits short lists and reminders: blank A4, blue ink, Daily Notebook style, and no margin line. All three are starting points — change one control at a time after applying one." },
+      { question: "Does the editor save my notes if I close the tab?", answer: "Yes, in this browser. The editor saves a draft — text, settings, filename, and note details — to your browser's local storage under a second after you stop typing, and restores it when you reopen the same tool page. It never leaves your device, and clearing browser data or switching browsers loses it, so export finished notes as PDF rather than treating the draft as storage." },
     ],
     deepDive: {
       heading: "Handwritten Notes Deep Dive: From Rough Class Notes to Polished Revision Pages",
@@ -227,6 +236,7 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
   pdf: {
     profile: "pdf",
     path: "/tools/text-to-handwriting-pdf",
+    dateModified: "2026-11-16",
     name: "PDF to Handwriting Converter",
     title: "PDF to Handwriting Converter Online Free | HandTextGraph",
     description: "Turn text into a handwriting PDF: upload a selectable-text PDF, choose pages or ranges, edit the extracted text, and export handwritten pages as PDF, PNG, or JPG.",
@@ -276,6 +286,7 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
   worksheet: {
     profile: "worksheet",
     path: "/tools/handwriting-worksheet-generator",
+    dateModified: "2026-11-28",
     name: "Handwriting Worksheet Generator",
     title: "Handwriting Worksheet Generator | Printable Tracing & Cursive Practice Sheets | HandTextGraph",
     description: "Free handwriting worksheet generator: printable name tracing sheets, A–Z alphabet practice in print and cursive, and custom word tracing pages with kid-friendly guide lines. Export PDF or PNG.",
@@ -313,5 +324,18 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
       { question: "How do I reuse a worksheet without reprinting it?", answer: "Print the sheet, slide it into a dry-erase pocket or laminate it, and trace with a dry-erase marker. Wipe clean and reuse." },
       { question: "Can I use these worksheets in my classroom?", answer: "Yes. Generate and print as many copies as you need for classroom or home use, with a name-and-date header on every page." },
     ],
+    deepDive: {
+      heading: "Handwriting Worksheet Deep Dive: Tracing Sheets That Actually Teach Letter Formation",
+      paragraphs: [
+        "This page holds two builders, not one. The tracing builder at the top makes name, alphabet, and word-list practice sheets with model, tracing, and blank rows on three-line guides. Below it, the advanced builder makes academic worksheets — question and answer, fill in the blank, matching, and sentence writing — with an optional answer key. Both render entirely in your browser, nothing is uploaded, and there is no account to create. The tracing builder is for learning letter shapes; the academic builder is for testing what a learner knows. Use each for its own job and neither will disappoint you.",
+        "The tracing builder offers three modes. Name tracing takes one name or word of up to 40 characters — keep it short for large letters, because a long name shrinks to fit the row. A–Z alphabet generates the full alphabet in uppercase, lowercase, or both, so one sheet covers the complete letter set in reading order; the both-cases option pairs each capital with its small letter (Aa, Bb, Cc). Word list mode takes up to 60 words, one per line — spelling lists, sight words, vocabulary, or family names — and every word gets its own block of model, tracing, and practice rows. Because the words are yours, the same sheet doubles as handwriting practice and reading reinforcement.",
+        "Every block follows the same structure: one solid model row, then dotted tracing rows, then blank practice rows. The model row shows the word once in solid blue or black ink. Each tracing row repeats the same word in dotted outline across the full width of the row, so there is always more tracing to do rather than one short example. The blank rows show only the guide lines, for independent practice. You choose 1 to 3 tracing rows and 0 to 3 blank rows per block — the defaults are 2 and 2. More tracing rows suit beginners who still need the outline; more blank rows suit confident writers who only need the occasional check. A single long word never overflows its row: the renderer shrinks the font to fit instead.",
+        "The three guide lines are the teaching tool, not decoration. The solid sky line at the top marks where tall letters like b, d, and h reach. The dashed grass midline marks the top of small letters like a, e, and n. The solid ground baseline is where every letter sits, with tails like g, j, p, q, and y dipping just below it. When children can see all three zones, common problems fix themselves: floating letters land on the ground line, oversized small letters shrink to the grass line, and tall letters stop crashing into the row above. Line size has three settings — large for beginners, medium for most kids, small for confident writers. Print mode renders in Patrick Hand, a clear block hand; cursive mode renders in Caveat, a joined slanted script. You can switch the guides off for a clean look, but keep them on while letter formation is still being learned.",
+        "Paper and printing are small decisions with visible effects. Choose A4 (210 × 297 mm) or Letter (8.5 × 11 in) to match the paper in your printer, and always print at 100% or Actual size rather than Fit to page — scaling shrinks the guide lines and defeats the sizing you chose. Pages render at full print resolution (A4 at 1240 × 1754, Letter at 1275 × 1650), so the preview is what the printer produces. Long lists flow across pages automatically, and a Page X of Y footer appears whenever there are two or more pages. Every page carries a Name and Date write-in header, which you can switch off; leave it on for classroom sets, where it makes collecting and filing easy.",
+        "Export matches the job. The PDF button downloads the whole set — every page in one file, in order — which is the practical choice for an alphabet pack or a spelling list. The PNG button downloads only the page currently shown in the preview, which suits a single sheet dropped into a document or message. The Print button opens the pages in a print popup, so allow pop-ups for this site if your browser blocks it. For reuse without reprinting, print once and slide the page into a dry-erase pocket or laminate it, then trace with a dry-erase marker and wipe clean. Handwriting practice works best in short, regular sessions: ten focused minutes tracing and copying beats an hour of tired scribbling.",
+        "The advanced builder below the tracing tool is for a different kind of worksheet. Add questions in four types — question and answer, fill in the blank, matching, and sentence writing — and set a title, description, subject, grade, and instructions. Three templates change the look: Classic classroom in blue, Primary practice in green, and Minimal ink in slate. Orientation is portrait or landscape, margins run from 55 to 150, a printable border is optional, and switching on the answer key adds answer pages at the end of the document. Export is an A4 PDF, a PNG of the current page, or print. It opens with a ready example — a Science Review Worksheet for Grade 6 with three questions — which you can edit or replace. Reach for this builder when the work is questions and answers; reach for the tracing builder when the work is letter shapes.",
+        "Know what neither builder does. The tracing generator renders rows from the text you provide; it does not teach stroke order, check a child's tracing, or reproduce any specific school handwriting program's letterforms. Review the letter shapes in the preview before printing a class set, and compare them with the letterforms your school teaches — the cursive mode is a joined font, not a pen, so its joins will not match every school's cursive. Practise the letters that cause trouble rather than whole pages: capitals are the usual problem, so make a sheet of the capitals in the names your learner actually writes. Short daily practice on a few letters beats one long session on a whole alphabet. And everything here stays private: worksheets render in your browser and are never uploaded, so a child's name or a class list never leaves your device.",
+      ],
+    },
   },
 };

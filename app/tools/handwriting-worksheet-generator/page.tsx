@@ -104,7 +104,7 @@ const schemas = [
     inLanguage: "en",
     isPartOf: { "@id": `${siteUrl}/#website` },
     mainEntity: { "@id": `${siteUrl}${tool.path}#application` },
-    dateModified: "2026-09-28",
+    dateModified: tool.dateModified,
   },
   {
     "@context": "https://schema.org",
@@ -353,6 +353,24 @@ export default async function HandwritingWorksheetGeneratorPage() {
           </div>
         </div>
       </section>
+
+      {tool.deepDive && (
+        <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8" aria-labelledby="deep-dive">
+          <div className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-card lg:p-10">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-blue">In-depth guide</p>
+              <h2 id="deep-dive" className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+                {tool.deepDive.heading}
+              </h2>
+            </div>
+            <div className="mt-6 max-w-3xl space-y-5">
+              {tool.deepDive.paragraphs.map((paragraph, index) => (
+                <p key={index} className="leading-8 text-slate-600">{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8" aria-labelledby="worksheet-faq">
         <h2 id="worksheet-faq" className="text-3xl font-semibold tracking-tight text-slate-950">Frequently asked questions</h2>

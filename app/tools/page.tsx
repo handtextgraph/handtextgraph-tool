@@ -1,11 +1,27 @@
 import type { Metadata } from "next";
 import { Eyebrow, PublicContainer, ToolDirectoryLink } from "@/components/ui/PublicUi";
+import { defaultSocialImage } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
 import { toolCategories, toolCategoryIntros, toolsInCategory } from "@/lib/tool-catalog";
 
 export const metadata: Metadata = {
   title: "Free Handwriting, Printable Paper & Classroom Tools",
   description: "Choose a free browser-based tool for handwriting, graph and technical paper, practice sheets, classroom activities, signatures, and creative printables.",
   alternates: { canonical: "/tools" },
+  openGraph: {
+    title: "Free Handwriting, Printable Paper & Classroom Tools | HandTextGraph",
+    description: "Choose a free browser-based tool for handwriting, graph and technical paper, practice sheets, classroom activities, signatures, and creative printables.",
+    url: "/tools",
+    siteName: siteConfig.name,
+    type: "website",
+    images: [defaultSocialImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Free Handwriting, Printable Paper & Classroom Tools | HandTextGraph",
+    description: "Choose a free browser-based tool for handwriting, graph and technical paper, practice sheets, classroom activities, signatures, and creative printables.",
+    images: [defaultSocialImage.url],
+  },
 };
 
 export default function ToolsPage() {
