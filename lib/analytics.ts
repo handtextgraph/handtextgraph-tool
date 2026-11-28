@@ -15,7 +15,7 @@ export type PageCountBand = "1" | "2-5" | "6-10" | "11+";
 export type ExportFormat = "pdf" | "png" | "jpg";
 export type ErrorCategory =
   | "render_failed" | "password_protected" | "no_selectable_text" | "read_failed"
-  | "image_download_failed" | "pdf_creation_failed" | "legacy_doc" | "invalid_type"
+  | "image_download_failed" | "pdf_creation_failed" | "zip_creation_failed" | "legacy_doc" | "invalid_type"
   | "too_large" | "too_complex" | "empty" | "text_limit" | "corrupt" | "cancelled"
   | "invalid_range" | "page_limit";
 export type LinkTarget =

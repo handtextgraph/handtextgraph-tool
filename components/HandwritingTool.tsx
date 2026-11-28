@@ -15,7 +15,7 @@ import { removeCustomFont } from "@/lib/custom-fonts";
 import { FontUploadControl } from "@/components/FontUpload";
 import { toolProfiles, type ToolProfile } from "@/lib/tool-profiles";
 import { type HandwritingDraft, useHandwritingDraft } from "@/hooks/useHandwritingDraft";
-import { paperGeneratorDefinitions, type PaperGeneratorSlug } from "@/lib/paper-generators";
+import { type PaperGeneratorSlug } from "@/lib/paper-generators";
 import { PdfTextImporter } from "@/components/PdfTextImporter";
 import { DocxTextImporter } from "@/components/DocxTextImporter";
 import { getPageCountBand, trackEvent, trackPreviewError, trackPreviewRendered, trackToolView } from "@/lib/analytics";
@@ -26,12 +26,40 @@ import {
   type ExportablePage,
 } from "@/lib/handwriting-export";
 
-const pageTypes = [
-  { value: "lined", label: "Lined Paper" },
-  { value: "blank", label: "Blank Paper" },
-  { value: "graph", label: "Graph Paper" },
-  { value: "custom", label: "Custom Paper" },
-] as const;
+/**
+ * Named paper styles for the converter. Each style maps to the renderer's
+ * two paper settings: plain lined/graph/blank pages use the engine's own
+ * ruling, while named patterns (dot grid, Cornell, Seyes…) use the
+ * printable-paper engine as the background layer, which replaces the
+ * plain ruling (see drawPaper in lib/handwriting.ts). The settings shape
+ * is unchanged, so existing saved settings keep working.
+ */
+const paperStyles: ReadonlyArray<{
+  value: string;
+  label: string;
+  pageType: RenderSettings["pageType"];
+  paperPatternId: PaperGeneratorSlug | "none";
+}> = [
+  { value: "blank", label: "Blank paper", pageType: "blank", paperPatternId: "none" },
+  { value: "lined", label: "Lined paper", pageType: "lined", paperPatternId: "none" },
+  { value: "graph", label: "Graph paper", pageType: "graph", paperPatternId: "none" },
+  { value: "dot-grid", label: "Dot grid", pageType: "blank", paperPatternId: "dot-grid-paper-generator" },
+  { value: "isometric", label: "Isometric paper", pageType: "blank", paperPatternId: "isometric-paper-generator" },
+  { value: "hexagonal", label: "Hexagonal paper", pageType: "blank", paperPatternId: "hexagonal-paper-generator" },
+  { value: "triangle-grid", label: "Triangle grid", pageType: "blank", paperPatternId: "triangle-grid-generator" },
+  { value: "coordinate-plane", label: "Coordinate plane", pageType: "blank", paperPatternId: "coordinate-plane-generator" },
+  { value: "polar", label: "Polar paper", pageType: "blank", paperPatternId: "polar-graph-paper-generator" },
+  { value: "semi-log", label: "Semi-log paper", pageType: "blank", paperPatternId: "semi-log-paper-generator" },
+  { value: "log-log", label: "Log-log paper", pageType: "blank", paperPatternId: "log-log-paper-generator" },
+  { value: "perspective-grid", label: "Perspective grid", pageType: "blank", paperPatternId: "perspective-grid-generator" },
+  { value: "engineering", label: "Engineering paper", pageType: "blank", paperPatternId: "engineering-paper-generator" },
+  { value: "cornell", label: "Cornell notes", pageType: "blank", paperPatternId: "cornell-notes-generator" },
+  { value: "practice", label: "Handwriting practice paper", pageType: "blank", paperPatternId: "handwriting-practice-paper" },
+  { value: "seyes", label: "Seyes ruled paper", pageType: "blank", paperPatternId: "seyes-ruled-paper-generator" },
+  { value: "chinese-practice", label: "Chinese character practice paper", pageType: "blank", paperPatternId: "chinese-character-practice-paper-generator" },
+  { value: "music-staff", label: "Music staff paper", pageType: "blank", paperPatternId: "music-staff-paper" },
+  { value: "custom", label: "Custom paper (upload your own)", pageType: "custom", paperPatternId: "none" },
+];
 
 const inkColors = [
   { value: "blue", label: "Blue Ink" },
@@ -375,6 +403,27 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
     }));
   };
 
+  // Resolve the named paper style from the two stored settings, so settings
+  // saved under the old two-control UI still land on the right style.
+  const selectedPaperStyleValue =
+    paperStyles.find((style) => style.pageType === settings.pageType && style.paperPatternId === settings.paperPatternId)?.value ??
+    paperStyles.find((style) => style.paperPatternId === settings.paperPatternId)?.value ??
+    (settings.paperPatternId === "lined-paper-generator"
+      ? "lined"
+      : settings.paperPatternId === "graph-paper-generator"
+        ? "graph"
+        : settings.pageType);
+
+  const applyPaperStyle = (value: string) => {
+    const paperStyle = paperStyles.find((style) => style.value === value);
+    if (!paperStyle) return;
+    setSettings((current) => ({
+      ...current,
+      pageType: paperStyle.pageType,
+      paperPatternId: paperStyle.paperPatternId,
+    }));
+  };
+
   const downloadImage = async (page: RenderedPage, pageIndex: number, format: Extract<ExportFormat, "png" | "jpg">) => {
     const link = document.createElement("a");
     link.download = `${safeBaseName}-page-${pageIndex + 1}.${format}`;
@@ -409,6 +458,42 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
     } catch {
       setExportState({ active: false, message: "The image download failed. Try the current page, use PNG, or reduce PDF quality." });
       trackEvent("export_error", { tool_profile: profile, export_format: format, error_category: "image_download_failed" });
+    } finally {
+      exportLock.current = false;
+    }
+  };
+
+  const downloadZip = async (format: Extract<ExportFormat, "png" | "jpg">) => {
+    if (!canDownload || exportLock.current) return;
+    exportLock.current = true;
+    const pageCountBand = getPageCountBand(pages.length);
+    // Analytics only accepts png/jpg/pdf as the export format, so a ZIP of
+    // PNGs/JPGs is reported under its image format.
+    trackEvent("export_started", { tool_profile: profile, export_format: format, page_count_band: pageCountBand });
+
+    setExportState({ active: true, message: `Preparing ${pages.length}-page ZIP…` });
+    try {
+      const { default: JSZip } = await import("jszip");
+      const zip = new JSZip();
+      const exportPages = format === "png" && transparentPng ? await getTransparentPages() : pages;
+      for (let index = 0; index < exportPages.length; index += 1) {
+        setExportState({ active: true, message: `Adding page ${index + 1} of ${exportPages.length} to ZIP…` });
+        const dataUrl = format === "png" ? exportPages[index].pngUrl : await convertPngToJpg(exportPages[index]);
+        const blob = await (await fetch(dataUrl)).blob();
+        zip.file(`${safeBaseName}-page-${index + 1}.${format}`, blob);
+      }
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${safeBaseName}.zip`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+      setExportState({ active: false, message: "ZIP download complete." });
+      trackEvent("export_completed", { tool_profile: profile, export_format: format, page_count_band: pageCountBand });
+    } catch {
+      setExportState({ active: false, message: "The ZIP could not be created. Try the current page, use PNG, or reduce PDF quality." });
+      trackEvent("export_error", { tool_profile: profile, export_format: format, error_category: "zip_creation_failed" });
     } finally {
       exportLock.current = false;
     }
@@ -778,21 +863,22 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
           </div>
 
           <div>
-            <label className="input-label" htmlFor="pageType">
-              Page Type
+            <label className="input-label" htmlFor="paperStyle">
+              Paper style
             </label>
             <select
-              id="pageType"
+              id="paperStyle"
               className="input-field"
-              value={settings.pageType}
-              onChange={(event) => updateSetting("pageType", event.target.value as RenderSettings["pageType"])}
+              value={selectedPaperStyleValue}
+              onChange={(event) => applyPaperStyle(event.target.value)}
             >
-              {pageTypes.map((pageType) => (
-                <option key={pageType.value} value={pageType.value}>
-                  {pageType.label}
+              {paperStyles.map((paperStyle) => (
+                <option key={paperStyle.value} value={paperStyle.value}>
+                  {paperStyle.label}
                 </option>
               ))}
             </select>
+            <p className="mt-1 text-xs leading-5 text-slate-500">Named styles use the printable-paper engine as the background. Handwriting line spacing stays independent.</p>
             {settings.pageType === "custom" && (
               <div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3">
                 <label className="block cursor-pointer text-sm font-semibold text-slate-700" htmlFor="customPaper">
@@ -846,15 +932,6 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
             <select id="orientation" className="input-field" value={settings.orientation} onChange={(event) => updateSetting("orientation", event.target.value as RenderSettings["orientation"])}>
               <option value="portrait">Portrait</option>{profileConfig.allowLandscape && <option value="landscape">Landscape</option>}
             </select>
-          </div>
-
-          <div>
-            <label className="input-label" htmlFor="paperPatternId">Shared paper background</label>
-            <select id="paperPatternId" className="input-field" value={settings.paperPatternId} onChange={(event) => updateSetting("paperPatternId", event.target.value as PaperGeneratorSlug | "none")}>
-              <option value="none">Use page type above</option>
-              {paperGeneratorDefinitions.map((definition) => <option key={definition.slug} value={definition.slug}>{definition.shortName}</option>)}
-            </select>
-            <p className="mt-1 text-xs leading-5 text-slate-500">Uses the printable-paper engine as a background layer. Handwriting line spacing remains independent.</p>
           </div>
 
           {settings.paperPatternId !== "none" && <RangeControl id="paperPatternSpacingMm" label="Background spacing (mm)" min={2} max={30} step={0.25} value={settings.paperPatternSpacingMm} onChange={(value) => updateSetting("paperPatternSpacingMm", value)} />}
@@ -1129,6 +1206,26 @@ export function HandwritingTool({ profile = "default" }: { profile?: ToolProfile
                 className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Download JPG
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  void downloadZip("png");
+                }}
+                disabled={!canDownload}
+                className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Download ZIP — all pages (PNG)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  void downloadZip("jpg");
+                }}
+                disabled={!canDownload}
+                className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Download ZIP — all pages (JPG)
               </button>
             </div>
           </section>
