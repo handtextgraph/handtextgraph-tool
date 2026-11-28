@@ -276,7 +276,7 @@ export const toolPageConfigs: Record<FunctionalToolProfile | WorksheetToolProfil
       { question: "Does the PDF generator support A4 and Letter paper?", answer: "Yes. Select A4 or Letter before export so the generated page matches your intended print size." },
       { question: "Is the PDF to handwriting converter online free?", answer: "Yes. PDF text extraction, handwriting conversion, preview, and export are free to use without an account." },
       { question: "Does it keep my PDF's original layout?", answer: "No. The importer reads selectable text in page order and renders it as new handwritten pages; the original layout is not preserved." },
-      { question: "Can I export a ZIP of all pages?", answer: "No. Export is a single PDF for all pages or the current page, or PNG or JPG per page; ZIP export is not offered." },
+      { question: "Can I export a ZIP of all pages?", answer: "Yes. In More formats, choose Download ZIP — all pages (PNG or JPG) to get every generated page as separate image files in one .zip file." },
       { question: "Can I make the ink lighter or darker?", answer: "No. There is no ink opacity or darkness slider; all ink prints at full strength. Choose a lighter ink colour, such as blue instead of black, for a softer look." },
       { question: "Does the tool tilt each line?", answer: "Yes, in a limited way. Optional Page Tilt in Advanced Settings (0 to 0.6) applies a slight random rotation to each line. It is one page-level setting, not a separate control per line." },
       { question: "Can I change the margins of the handwritten pages?", answer: "Yes. Left Margin and Top Margin sliders in Advanced Settings move the writing block on the page." },
